@@ -16,12 +16,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
 <link rel="stylesheet" href="/site.css">
+<script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+document.documentElement.classList.add("js");</script>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <a class="brand" href="/"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>ClosedVPS</a>
-  <nav><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a></nav>
+  <nav><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a><button class="theme" type="button" aria-label="Switch light or dark"><svg class="i moon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg><svg class="i sun" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></button></nav>
 </header>
 <main class="doc">
   <h1>How to lock down a Hetzner VPS by hand</h1>
@@ -67,5 +69,13 @@ END</pre>
 </main>
 <footer><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
 </div>
+<script>
+document.querySelector(".theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+});
+</script>
 </body>
 </html>
