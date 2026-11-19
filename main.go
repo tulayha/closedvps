@@ -28,7 +28,7 @@ const (
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	err := newRoot(newApp()).ExecuteContext(ctx)
+	err := run(ctx, newApp(), os.Args[1:])
 	stop()
 	code := exitCode(err)
 	switch {
@@ -60,11 +60,26 @@ func exitCode(err error) int {
 	return exitFailed
 }
 
+// run is one closedvps command, followed by the note about a newer release when there is one.
+func run(ctx context.Context, a *app, args []string) error {
+	root := newRoot(a)
+	root.SetArgs(args)
+	err := root.ExecuteContext(ctx)
+	if a.updateNote != nil {
+		if note := a.updateNote(); note != "" {
+			fmt.Fprintln(a.stderr, "\n"+note)
+		}
+	}
+	return err
+}
+
 func newRoot(a *app) *cobra.Command {
 	root := &cobra.Command{
-		Use:           "closedvps",
-		Short:         "Buy a Hetzner Cloud server with every inbound port closed",
-		Long:          "closedvps buys a Hetzner Cloud server with every inbound port closed.\n\nDocs: https://closedvps.com",
+		Use:   "closedvps",
+		Short: "Buy a Hetzner Cloud server with every inbound port closed",
+		Long: "closedvps buys a Hetzner Cloud server with every inbound port closed.\n\n" +
+			"Once a day at most, a command run in a terminal asks GitHub whether a newer release is out and says so\n" +
+			"when it ends. CLOSEDVPS_NO_UPDATE_CHECK=1 turns that off.\n\nDocs: https://closedvps.com",
 		Version:       currentVersion(),
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -74,13 +89,14 @@ func newRoot(a *app) *cobra.Command {
 			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
+		RunE:             func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
+		PersistentPreRun: func(cmd *cobra.Command, _ []string) { a.startUpdateCheck(cmd.Context(), cmd) },
 	}
 	root.SetOut(a.stdout)
 	root.SetErr(a.stderr)
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error { return usageError{err} })
 	root.AddCommand(newCreateCmd(a), newSetupCmd(a), newTypesCmd(a), newListCmd(a),
-		newOpenSSHCmd(a), newCloseSSHCmd(a), newForgetCmd(a), &cobra.Command{
+		newOpenSSHCmd(a), newCloseSSHCmd(a), newForgetCmd(a), newUpgradeCmd(a), &cobra.Command{
 			Use:   "version",
 			Short: "Print the version",
 			Args:  cobra.NoArgs,

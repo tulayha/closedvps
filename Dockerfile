@@ -4,5 +4,7 @@ FROM gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c
 ARG TARGETPLATFORM
 # Go finds the config folder through HOME, which distroless doesn't set.
 ENV HOME=/home/nonroot
+# closedvps upgrade tells you to pull a new image instead.
+ENV CLOSEDVPS_IN_DOCKER=1
 COPY $TARGETPLATFORM/closedvps /usr/bin/closedvps
 ENTRYPOINT ["/usr/bin/closedvps"]

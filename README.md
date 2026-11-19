@@ -53,6 +53,11 @@ CLOUDFLARE_TUNNEL_TOKEN=... closedvps create      # with a Cloudflare Tunnel for
 Any saved answer can be overridden for one run with a flag (`--location`, `--type`, `--max-price`,
 `--max-total`, `--backups`); `closedvps create --help` lists them.
 
+`closedvps upgrade` replaces it with the newest release, checked against the release's checksums the way the
+install scripts check it. Once a day at most, a command you run in a terminal asks GitHub whether a newer
+release is out and says so when it ends. Runs with `--json` or `--yes` never ask, and
+`CLOSEDVPS_NO_UPDATE_CHECK=1` turns it off. In Docker, pull the image again.
+
 ## Prices and several servers
 
 Every price is per month before VAT, with the IPv4 address included (and backups, when on), in your Hetzner account's

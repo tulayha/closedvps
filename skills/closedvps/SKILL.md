@@ -13,6 +13,9 @@ Install if `closedvps version` fails:
 - macOS, Linux: `curl -fsSL https://closedvps.com/install.sh | sh`
 - Windows: `irm https://closedvps.com/install.ps1 | iex`
 
+`closedvps upgrade` updates a copy the install scripts put there. Your runs never get the daily "newer
+release" note, since it only shows in a terminal and never with `--json` or `--yes`.
+
 Ask the user to export these in the shell you use (don't put them in files or the chat):
 `HCLOUD_TOKEN` (Hetzner, Read & Write; not needed if they saved one with `closedvps setup`), `TS_AUTHKEY`
 (Tailscale, pre-approved; one-off for one server, reusable with a one-day expiry for `--count`), and optionally

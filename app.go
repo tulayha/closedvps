@@ -39,6 +39,12 @@ type app struct {
 	peers     func(ctx context.Context, bin string) ([]tsPeer, error)
 	sshUp     func(ip string) bool
 	awake     func() func() // keeps the computer from sleeping; returns the release
+
+	watched     bool          // stdout and stderr are terminals, so a person sees the update note
+	installedBy string        // how this copy got here: fromRelease, fromGo, fromDocker or fromSource
+	releases    string        // the latest-release API; empty is GitHub's
+	self        string        // the binary upgrade replaces; empty is this one
+	updateNote  func() string // set by startUpdateCheck
 }
 
 func newApp() *app {
@@ -60,6 +66,9 @@ func newApp() *app {
 		peers:     tailscalePeers,
 		sshUp:     sshAnswers,
 		awake:     keepAwake,
+
+		watched:     term.IsTerminal(int(os.Stdout.Fd())) && term.IsTerminal(int(os.Stderr.Fd())),
+		installedBy: installedBy(),
 	}
 }
 

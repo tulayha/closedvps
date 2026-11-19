@@ -68,9 +68,7 @@ func newTestApp(t *testing.T, endpoint string) *testRun {
 }
 
 func (tr *testRun) run(ctx context.Context, args ...string) error {
-	root := newRoot(tr.app)
-	root.SetArgs(args)
-	return root.ExecuteContext(ctx)
+	return run(ctx, tr.app, args)
 }
 
 // create runs a create the way an agent would: --yes --json, without waiting for the tailnet.
