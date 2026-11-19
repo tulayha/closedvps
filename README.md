@@ -29,7 +29,7 @@ The first run asks for a few things and remembers them:
   offers to keep in your system's password store;
 - which locations and server types to try and in what order, shown with live prices and stock;
 - the most you'll pay per month per server and for all of them together, and whether to turn on Hetzner
-  Backups (on unless you say no);
+  Backups (off unless you say yes);
 - your user name on the server, and where alerts go besides this computer.
 
 Every run then asks for a Tailscale auth key (login.tailscale.com/admin/settings/keys). Make it one-off and
@@ -51,11 +51,11 @@ CLOUDFLARE_TUNNEL_TOKEN=... closedvps create      # with a Cloudflare Tunnel for
 ```
 
 Any saved answer can be overridden for one run with a flag (`--location`, `--type`, `--max-price`,
-`--max-total`, `--backups=false`); `closedvps create --help` lists them.
+`--max-total`, `--backups`); `closedvps create --help` lists them.
 
 ## Prices and several servers
 
-Every price is per month before VAT, with the IPv4 address and backups included, in your Hetzner account's
+Every price is per month before VAT, with the IPv4 address included (and backups, when on), in your Hetzner account's
 currency. `--max-price` caps each server. A type can carry its own cap in the list, so `--type cx23:6,cx33:12`
 tries cx23 at up to 6 and then cx33 at up to 12. `--max-total` caps all the servers ClosedVPS made in that
 Hetzner project together, counting the ones already there, and it's checked before every purchase. Prices are

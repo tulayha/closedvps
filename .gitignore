@@ -3,5 +3,3 @@
 /closedvps.exe
 node_modules/
 .wrangler/
-/site/public/style.css
-/site/public/js/

@@ -3,15 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tailwindcss -i src/style.css -o public/style.css --minify && mkdir -p public/js && cp node_modules/basecoat-css/dist/js/basecoat.min.js node_modules/basecoat-css/dist/js/tabs.min.js public/js/",
     "dev": "wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "wrangler deploy",
     "terminal": "node scripts/terminal.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "4.3.5",
-    "basecoat-css": "1.1.0",
-    "tailwindcss": "4.3.5",
     "wrangler": "4.164.0"
   }
 }

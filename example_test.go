@@ -50,7 +50,7 @@ func exampleRun(t *testing.T) string {
 	if err := os.WriteFile(filepath.Join(home, ".ssh", "id_ed25519.pub"), []byte(testKey+"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := savePrefs(prefs{Locations: []string{"nbg1", "hel1"}, Types: []string{"cx23", "cax11"}, MaxPrice: 10, Backups: true, User: "dev"}); err != nil {
+	if _, err := savePrefs(prefs{Locations: []string{"nbg1", "hel1"}, Types: []string{"cx23", "cax11"}, MaxPrice: 10, User: "dev"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -153,8 +153,12 @@ func TestSiteShowsRealOutput(t *testing.T) {
 		t.Fatal("no story terminal in index.html")
 	}
 	var lines []string
-	for _, ln := range regexp.MustCompile(`(?s)<span class="ln">(.*?)</span>(?:<span class="ln">|$)`).FindAllSubmatch(append(pre[1], []byte(`<span class="ln">`)...), -1) {
-		lines = append(lines, html.UnescapeString(regexp.MustCompile(`<[^>]+>`).ReplaceAllString(string(ln[1]), "")))
+	tags := regexp.MustCompile(`<[^>]+>`)
+	for _, ln := range strings.Split(string(pre[1]), `<span class="ln">`)[1:] {
+		lines = append(lines, html.UnescapeString(tags.ReplaceAllString(ln, "")))
+	}
+	if len(lines) < 15 {
+		t.Fatalf("read only %d lines from the story terminal", len(lines))
 	}
 	check("index.html", lines)
 }

@@ -19,14 +19,14 @@ Ask the user to export these in the shell you use (don't put them in files or th
 `CLOUDFLARE_TUNNEL_TOKEN` and `CLOSEDVPS_NOTIFY` (alert links, if none are saved).
 
 Without a terminal, `create` uses the user's saved answers from `closedvps setup`, or the defaults (nbg1,
-fsn1, hel1; any shared type cheapest first; 10 a month per server; no total cap; backups on). Pass agreed
+fsn1, hel1; any shared type cheapest first; 10 a month per server; no total cap; no backups). Pass agreed
 choices as flags.
 
 Commands:
 
 - `closedvps types`: prices and stock, read-only.
 - `closedvps create --dry-run [options]`: the plan and the exact cloud-init, buys nothing.
-- `closedvps create --yes --json [--count <n>] --type <t1:cap,t2> --location <l1,l2> --max-price <n> [--max-total <n>] [--backups=false] [--claude]`:
+- `closedvps create --yes --json [--count <n>] --type <t1:cap,t2> --location <l1,l2> --max-price <n> [--max-total <n>] [--backups] [--claude]`:
   buys the first in-stock matches, retrying every minute until all are bought. With `--count` above 1 the
   servers are named `<name>-1` to `<name>-<n>`.
 - `closedvps list`: servers and whether each firewall is still closed.

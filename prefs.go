@@ -26,7 +26,7 @@ type prefs struct {
 }
 
 func defaultPrefs() prefs {
-	return prefs{Locations: []string{"nbg1", "fsn1", "hel1"}, MaxPrice: 10, Backups: true, User: defaultUser()}
+	return prefs{Locations: []string{"nbg1", "fsn1", "hel1"}, MaxPrice: 10, User: defaultUser()}
 }
 
 func configDir() (string, error) {

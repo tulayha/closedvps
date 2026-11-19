@@ -46,17 +46,16 @@ An example run, 19 Nov 2026:
 
 ```
 $ closedvps create
-Buys the first of these Hetzner has in stock (per month with IPv4 and backups, before VAT):
-  cx23   nbg1   2 cores    4 GB x86  7.09 EUR/month
-  cax11  hel1   2 cores    4 GB arm  7.69 EUR/month
+Buys the first of these Hetzner has in stock (per month with IPv4, before VAT):
+  cx23   nbg1   2 cores    4 GB x86  5.99 EUR/month
+  cax11  hel1   2 cores    4 GB arm  6.49 EUR/month
 Buy it? [y/N] y
 Firewall closedvps-vps ready, no inbound rules
 09:14:02  nothing on your list is in stock (check 1)
 Trying again every minute until one is bought. Ctrl+C stops.
 ... 2 hours later ...
-11:43:02  cax11 hel1   vps bought, 7.69 EUR/month
+11:43:02  cax11 hel1   vps bought, 6.49 EUR/month
 vps is running at 203.0.113.1, unreachable from the internet.
-Backups are on.
 First-boot setup takes 3 to 5 minutes.
 Waiting for vps to join your tailnet............ online
 Ready: ssh dev@vps
@@ -67,7 +66,7 @@ Not shown: 1000 filtered tcp ports (no-response)
 $ ssh dev@vps
 ```
 
-## What the server gets
+## What you get: locked down before it boots
 
 The Hetzner firewall has no inbound rules and is attached in the same API call that creates the server, so it
 never boots open. Scanned from the internet, every port shows as filtered. If another firewall in your project
@@ -75,7 +74,7 @@ lets traffic in, ClosedVPS warns you, and `closedvps list` checks again any time
 
 SSH takes keys only, for one user named after your account on your computer, and only over Tailscale. Root
 can't log in. Security updates install daily, with a reboot at 04:00 UTC when one needs it. Hetzner Backups keep
-7 daily copies for 20% of the server price, on unless you turn them off.
+7 daily copies for 20% of the server price, when you turn them on with `--backups`.
 
 Pass `CLOUDFLARE_TUNNEL_TOKEN` and the server runs your Cloudflare Tunnel, for sites you want public. If you
 install Docker later, ports you publish bind to 127.0.0.1; to reach one from your laptop, publish it on the
