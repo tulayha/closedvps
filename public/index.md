@@ -30,7 +30,8 @@ Credential Manager or the Linux Secret Service), and `closedvps forget` deletes 
 to buy, your price caps, backups, your user name and where alerts go, and remembers the answers. The Tailscale key
 is asked for on every run and never saved. `closedvps create --dry-run` prints the whole first-boot setup
 before you pay for anything. Every flag is in `closedvps create --help` and the
-[README](https://github.com/tulayha/closedvps#quick-start).
+[README](https://github.com/tulayha/closedvps#quick-start), and `closedvps upgrade` updates it when a new release is
+out.
 
 ## When Hetzner is sold out
 
