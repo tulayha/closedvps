@@ -10,7 +10,7 @@ permissions:
 jobs:
   # Every CI check, install scripts included, passes before anything is published.
   verify:
-    uses: ./.github/workflows/ci.yml
+    uses: $/.github/workflows/ci.yml
     permissions:
       contents: read
 

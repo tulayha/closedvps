@@ -141,11 +141,14 @@ html:not(.js) .steps, html:not(.js) .stage .nav { display: none; }
 
 /* before you start */
 .needs { margin: 36px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; }
-.needs li { padding: 20px; border-radius: 16px; background: var(--paper); border: 1px solid var(--line); }
-.needs .ic { width: 38px; height: 38px; margin-bottom: 14px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-bg); color: var(--accent); }
+.needs li { display: flex; flex-direction: column; padding: 20px; border-radius: 16px; background: var(--paper); border: 1px solid var(--line); }
+.needs .ic { flex: none; width: 38px; height: 38px; margin-bottom: 14px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-bg); color: var(--accent); }
 .needs b { display: block; font-weight: 600; font-size: 16px; }
 .needs span { display: block; margin-top: 4px; font-size: 15px; color: var(--muted); }
 .after { margin-top: 24px; }
+.after a { color: var(--ink); text-underline-offset: 3px; }
+.needs .how { display: flex; gap: 16px; margin-top: auto; padding-top: 12px; font-size: 13.5px; }
+.needs .how a { color: var(--accent); font-weight: 500; text-underline-offset: 3px; }
 
 .two { display: grid; gap: 26px; align-items: center; }
 .two > * { min-width: 0; }

@@ -42,6 +42,7 @@ func exampleRun(t *testing.T) string {
 	tr := newTestApp(t, url)
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // os.UserHomeDir on Windows
 	t.Setenv("CLOSEDVPS_SSH_KEY", "")
 	t.Setenv("CLOSEDVPS_NOTIFY", "")
 	if err := os.MkdirAll(filepath.Join(home, ".ssh"), 0o700); err != nil {
@@ -82,7 +83,7 @@ func exampleRun(t *testing.T) string {
 		t.Fatalf("%v\n%s", err, out.String())
 	}
 	s := strings.ReplaceAll(out.String(), "\a", "")
-	return strings.ReplaceAll(s, home, "~")
+	return filepath.ToSlash(strings.ReplaceAll(s, home, "~"))
 }
 
 // testdata/example-run.txt is what a person sees in a whole run. The site's terminal is made from it

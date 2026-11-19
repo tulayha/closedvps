@@ -1,6 +1,6 @@
 # ClosedVPS
 
-> Free, open-source CLI that buys a Hetzner Cloud server even while Hetzner is sold out. It retries every minute from the user's own computer or any machine that stays on (there's a Docker image), within price caps per server type and for all servers together, buys several with --count, and alerts the user on the desktop and optionally through ntfy, Discord, Slack, Telegram or a webhook. The server comes up behind a Hetzner firewall with no inbound rules, with SSH only over Tailscale, automatic security updates, Hetzner Backups on by default and an optional Cloudflare Tunnel for websites. macOS, Linux, Windows. MIT.
+> Free, open-source CLI that buys a Hetzner Cloud server even while Hetzner is sold out. It retries every minute from the user's own computer or any machine that stays on (there's a Docker image), within price caps per server type and for all servers together, buys several with --count, and alerts the user on the desktop and optionally through ntfy, Discord, Slack, Telegram or a webhook. The server comes up behind a Hetzner firewall with no inbound rules, with SSH only over Tailscale, automatic security updates, Hetzner Backups when asked for and an optional Cloudflare Tunnel for websites. macOS, Linux, Windows. MIT.
 
 Install: `curl -fsSL https://closedvps.com/install.sh | sh` (macOS, Linux) or `irm https://closedvps.com/install.ps1 | iex` (Windows). Then `closedvps create`.
 

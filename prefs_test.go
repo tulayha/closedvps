@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/zalando/go-keyring"
@@ -19,7 +21,7 @@ func TestPrefsRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if st, _ := os.Stat(path); st.Mode().Perm() != 0o600 {
+	if st, _ := os.Stat(path); unixPerm(st) != 0o600 {
 		t.Errorf("config mode %v", st.Mode().Perm())
 	}
 	got, saved, err := loadPrefs()
@@ -41,7 +43,7 @@ func TestStoreFallsBackToFile(t *testing.T) {
 	if _, err := tokenStore.save("tok"); err != nil {
 		t.Fatal(err)
 	}
-	if st, err := os.Stat(path); err != nil || st.Mode().Perm() != 0o600 {
+	if st, err := os.Stat(path); err != nil || unixPerm(st) != 0o600 {
 		t.Fatalf("token file: %v %v", st.Mode(), err)
 	}
 	if tokenStore.get() != "tok" {
@@ -62,4 +64,13 @@ func TestStoreInKeyring(t *testing.T) {
 	if removed, _ := linksStore.forget(); !removed || linksStore.get() != "" {
 		t.Fatal("forget didn't remove it")
 	}
+}
+
+// unixPerm reads the mode bits, which Windows doesn't have: there the config sits in the user's own
+// AppData folder, whose access list keeps other users out.
+func unixPerm(st fs.FileInfo) fs.FileMode {
+	if runtime.GOOS == "windows" {
+		return 0o600
+	}
+	return st.Mode().Perm()
 }
