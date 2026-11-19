@@ -21,12 +21,16 @@ irm https://closedvps.com/install.ps1 | iex
 closedvps create
 ```
 
-You need a Hetzner API token with Read & Write, a Tailscale auth key and an SSH key on this computer. The first
-run asks for the token and offers to keep it in your system's password store (macOS Keychain, Windows
+You need a Hetzner API token with Read & Write
+([how to make one](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/)),
+[Tailscale](https://tailscale.com/download) running on this computer, a one-off pre-approved
+[Tailscale auth key](https://login.tailscale.com/admin/settings/keys) and an SSH key on this computer
+(`ssh-keygen -t ed25519` makes one). The first run asks for the token and offers to keep it in your system's password store (macOS Keychain, Windows
 Credential Manager or the Linux Secret Service), and `closedvps forget` deletes it. Then it asks where and what
 to buy, your price caps, backups, your user name and where alerts go, and remembers the answers. The Tailscale key
 is asked for on every run and never saved. `closedvps create --dry-run` prints the whole first-boot setup
-before you pay for anything.
+before you pay for anything. Every flag is in `closedvps create --help` and the
+[README](https://github.com/tulayha/closedvps#quick-start).
 
 ## When Hetzner is sold out
 
