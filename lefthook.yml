@@ -1,0 +1,17 @@
+# Git hooks: install lefthook (https://lefthook.dev), then run `lefthook install` once in the repo.
+pre-commit:
+  parallel: true
+  jobs:
+    - name: format
+      glob: "*.go"
+      run: golangci-lint fmt --diff {staged_files}
+    - name: lint
+      glob: "*.go"
+      run: golangci-lint run --new-from-rev HEAD
+    - name: secrets
+      run: gitleaks git --pre-commit --staged --redact --no-banner
+
+pre-push:
+  jobs:
+    - name: test
+      run: go test -race ./...

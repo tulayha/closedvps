@@ -1,0 +1,29 @@
+version: "2"
+linters:
+  enable:
+    - bodyclose
+    - errorlint
+    - gosec
+    - misspell
+    - unconvert
+    - usestdlibvars
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (io.Closer).Close
+        - (net.Conn).Close
+    staticcheck:
+      checks: ["all", "-ST1000", "-ST1003", "-ST1005", "-ST1020", "-ST1021", "-ST1022"] # ST1005: errors start with "Hetzner"
+    gosec:
+      excludes:
+        - G204 # running tailscale, caffeinate and systemd-inhibit with fixed arguments is the point
+        - G501 # MD5 is how Hetzner fingerprints SSH keys, not a security check
+        - G401
+        - G304 # reading the SSH key file the user points at is the point
+formatters:
+  enable:
+    - gofumpt
+    - goimports

@@ -1,0 +1,9 @@
+{
+  "name": "closedvps",
+  "description": "Buy Hetzner Cloud servers with every inbound port closed (SSH over Tailscale), waiting and retrying while Hetzner is sold out.",
+  "author": { "name": "Talha Amjad", "url": "https://github.com/tulayha" },
+  "homepage": "https://closedvps.com",
+  "repository": "https://github.com/tulayha/closedvps",
+  "license": "MIT",
+  "keywords": ["hetzner", "vps", "tailscale", "server", "firewall"]
+}

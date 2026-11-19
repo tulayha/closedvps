@@ -1,0 +1,12 @@
+{
+  "name": "closedvps",
+  "description": "The closedvps skill for Claude Code",
+  "owner": { "name": "Talha Amjad", "url": "https://github.com/tulayha" },
+  "plugins": [
+    {
+      "name": "closedvps",
+      "source": "./",
+      "description": "Buy Hetzner Cloud servers with every inbound port closed, waiting and retrying while Hetzner is sold out."
+    }
+  ]
+}

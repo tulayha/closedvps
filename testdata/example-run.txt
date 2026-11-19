@@ -1,0 +1,19 @@
+Servers  vps, log in as dev with ~/.ssh/id_ed25519.pub
+Firewall closedvps-vps, no inbound rules
+Setup    Tailscale, automatic security updates on ubuntu-24.04
+Backups  on, 7 daily copies
+Alerts   on this computer only (closedvps setup or CLOSEDVPS_NOTIFY adds your phone or a chat)
+Buys the first of these Hetzner has in stock (per month with IPv4 and backups, before VAT):
+  cx23   nbg1   2 cores    4 GB x86  7.09 EUR/month
+  cax11  hel1   2 cores    4 GB arm  7.69 EUR/month
+Buy it? [y/N] y
+Firewall closedvps-vps ready, no inbound rules
+09:14:02  nothing on your list is in stock (check 1)
+Trying again every minute until one is bought. Ctrl+C stops.
+11:43:02  cax11 hel1   vps bought, 7.69 EUR/month
+vps is running at 203.0.113.1, unreachable from the internet.
+Backups are on.
+First-boot setup takes 3 to 5 minutes.
+Waiting for vps to join your tailnet............ online
+Ready: ssh dev@vps
+In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.

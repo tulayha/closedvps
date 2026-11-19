@@ -1,0 +1,44 @@
+version: 2
+
+builds:
+  - env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  # No version in the name, so releases/latest/download/<name> stays a fixed link for the install scripts.
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [LICENSE, README.md]
+
+checksum:
+  name_template: checksums.txt
+
+# An SPDX list of what's inside each archive, made by syft.
+sboms:
+  - artifacts: archive
+
+dockers_v2:
+  - images: ["ghcr.io/tulayha/closedvps"]
+    tags: ["{{ .Version }}", "latest"]
+    labels:
+      "org.opencontainers.image.source": "https://github.com/tulayha/closedvps"
+      "org.opencontainers.image.licenses": "MIT"
+    annotations:
+      "org.opencontainers.image.description": "Buys Hetzner Cloud servers with every inbound port closed, waiting while they're sold out"
+      "org.opencontainers.image.source": "https://github.com/tulayha/closedvps"
+      "org.opencontainers.image.version": "{{ .Version }}"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^ci:", "^chore\\(deps\\)"]

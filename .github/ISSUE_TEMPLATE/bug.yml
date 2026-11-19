@@ -1,0 +1,21 @@
+name: Bug
+description: Something closedvps did wrong
+body:
+  - type: markdown
+    attributes:
+      value: Security problems go to the Security tab ("Report a vulnerability"), not here. Leave tokens and alert links out.
+  - type: input
+    attributes:
+      label: Version
+      description: what `closedvps version` prints
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What you ran and what happened
+      description: the command, its output (or `--json` events), and the exit code
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What you expected

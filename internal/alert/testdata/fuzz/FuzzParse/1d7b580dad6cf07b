@@ -1,0 +1,2 @@
+go test fuzz v1
+string("telegrAm://0:0@0?chats=0:0")
