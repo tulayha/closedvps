@@ -18,9 +18,9 @@ func TestSetupWizardSavesAnswers(t *testing.T) {
 		&hetznertest.Type{Name: "cx23", Price: "4.00", InStock: hetznertest.Always},
 		&hetznertest.Type{Name: "cax11", Price: "4.50", InStock: hetznertest.Always})
 	tr := newTestApp(t, url)
-	// location, an unknown type, a bad cap, good types, price, total, user, alerts. Yes/no questions take
-	// their defaults without a terminal.
-	answers(tr, "3,nbg1", "cx99", "cx23:x", "cax11:6,cx23", "12", "30", "me", "none")
+	// location, an unknown type, a bad cap, good types, backups (Enter keeps yes), price, total, user, and
+	// alerts by number (4 is None when nothing is saved).
+	answers(tr, "3,nbg1", "cx99", "cx23:x", "cax11:6,cx23", "", "12", "30", "me", "4")
 	p, err := tr.app.setupWizard(context.Background(), tr.app.client("t"), defaultPrefs())
 	if err != nil {
 		t.Fatal(err)
@@ -43,7 +43,8 @@ func TestSetupAlertsFailedTelegramKeepsLinks(t *testing.T) {
 	if _, err := linksStore.save("https://ntfy.sh/closedvps-old"); err != nil {
 		t.Fatal(err)
 	}
-	answers(tr, "telegram")
+	// With links saved the menu is 1 Keep, 2 ntfy, 3 Telegram, 4 Links, 5 None.
+	answers(tr, "3")
 	if err := tr.app.setupAlerts(context.Background()); err == nil {
 		t.Fatal("want the Telegram error")
 	}
@@ -51,12 +52,12 @@ func TestSetupAlertsFailedTelegramKeepsLinks(t *testing.T) {
 		t.Fatalf("saved links now %q", got)
 	}
 
-	answers(tr, "https://ntfy.sh/a, ntfy.sh/typo")
+	answers(tr, "4", "https://ntfy.sh/a, ntfy.sh/typo")
 	if err := tr.app.setupAlerts(context.Background()); err == nil || linksStore.get() != "https://ntfy.sh/closedvps-old" {
 		t.Fatalf("a bad link must be refused without touching the saved ones: %v, %q", err, linksStore.get())
 	}
 
-	answers(tr, "none")
+	answers(tr, "5")
 	if err := tr.app.setupAlerts(context.Background()); err != nil || linksStore.get() != "" {
 		t.Fatalf("none should delete them: %v, %q", err, linksStore.get())
 	}

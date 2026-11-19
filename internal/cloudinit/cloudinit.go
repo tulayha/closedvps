@@ -3,7 +3,6 @@ package cloudinit
 
 import (
 	_ "embed"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"go.yaml.in/yaml/v3"
 	"golang.org/x/crypto/ssh"
 
 	"github.com/tulayha/closedvps/internal/alert"
@@ -20,33 +20,19 @@ import (
 //go:embed cloud-init.yaml.tmpl
 var tmplText string
 
-// quote makes any value a YAML double-quoted scalar. A JSON string is one, except that JSON leaves DEL and
-// other characters YAML can't print as they are; those get the \u escape both share.
-func quote(s string) string {
-	var b strings.Builder
-	e := json.NewEncoder(&b)
-	e.SetEscapeHTML(false)
-	_ = e.Encode(s)
-	var out strings.Builder
-	for _, r := range strings.TrimSuffix(b.String(), "\n") {
-		if yamlPrintable(r) {
-			out.WriteRune(r)
-		} else {
-			fmt.Fprintf(&out, `\u%04x`, r)
-		}
+// quote writes s as a YAML double-quoted scalar. The YAML library does the escaping, so nothing a user
+// types can end the string early. Invalid UTF-8 would come out as !!binary, a different value, so it's refused.
+func quote(s string) (string, error) {
+	if !utf8.ValidString(s) {
+		return "", errors.New("a value for the first-boot setup isn't valid text")
 	}
-	return out.String()
-}
-
-// yamlPrintable is YAML 1.2's c-printable, without tab and line breaks, which JSON has already escaped.
-func yamlPrintable(r rune) bool {
-	return (r >= 0x20 && r <= 0x7e) || r == 0x85 || (r >= 0xa0 && r <= 0xd7ff) ||
-		(r >= 0xe000 && r <= 0xfffd && r != 0xfeff) || (r >= 0x10000 && r <= 0x10ffff)
+	b, err := yaml.Marshal(&yaml.Node{Kind: yaml.ScalarNode, Style: yaml.DoubleQuotedStyle, Value: s})
+	return strings.TrimSuffix(string(b), "\n"), err
 }
 
 var tmpl = template.Must(template.New("cloud-init").Funcs(template.FuncMap{
 	"q":    quote,
-	"curl": func(r alert.Request) string { return quote(r.CurlConfig()) },
+	"curl": func(r alert.Request) (string, error) { return quote(r.CurlConfig()) },
 }).Parse(tmplText))
 
 // MaxSize is Hetzner's limit on user_data.
@@ -141,8 +127,11 @@ func Render(c Config) (string, error) {
 
 // Redact hides the secrets in a rendered setup, for --dry-run output.
 func Redact(doc string, c Config) string {
+	hidden, _ := quote("<hidden: alert link and message>")
 	for _, r := range c.Ready {
-		doc = strings.ReplaceAll(doc, quote(r.CurlConfig()), quote("<hidden: alert link and message>"))
+		if q, err := quote(r.CurlConfig()); err == nil {
+			doc = strings.ReplaceAll(doc, q, hidden)
+		}
 	}
 	for _, s := range []string{c.TailscaleKey, c.TunnelToken} {
 		if s != "" {

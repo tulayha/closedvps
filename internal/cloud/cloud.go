@@ -69,7 +69,14 @@ type Prices struct {
 	IPv4     map[string]float64
 }
 
-func (c *Client) Prices(ctx context.Context) (Prices, error) {
+// Prices reads the IPv4 prices. hcloud-go v2.53.0 panics on a pricing reply with more primary IP types than
+// floating IP types (fixed upstream in hetznercloud/hcloud-go#970), so a panic comes back as an error.
+func (c *Client) Prices(ctx context.Context) (_ Prices, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("couldn't read Hetzner's prices: the hcloud-go client failed on their reply (%v); a newer closedvps may fix it", r)
+		}
+	}()
 	p, _, err := c.Pricing.Get(ctx)
 	if err != nil {
 		return Prices{}, err

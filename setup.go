@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"charm.land/huh/v2"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/spf13/cobra"
 
@@ -43,6 +45,25 @@ the defaults for ` + "`closedvps create`" + `. Run it again to change them.`,
 	}
 }
 
+// text asks for one line, starting from def. Enter keeps def; check sees what was typed, never "".
+func (a *app) text(title, def string, check func(string) error) (string, error) {
+	v := def
+	in := huh.NewInput().Title(title).Value(&v).Validate(func(s string) error {
+		if strings.TrimSpace(s) == "" {
+			return nil // Enter alone keeps the default
+		}
+		return check(strings.TrimSpace(s))
+	})
+	if err := a.question(in, func() string { return title + " " + cmp.Or(strings.TrimSpace(v), def) }); err != nil {
+		return "", err
+	}
+	if v = strings.TrimSpace(v); v == "" {
+		return def, nil
+	}
+	// huh's plain prompts hand back the last answer, valid or not, when the input ends.
+	return v, check(v)
+}
+
 // setupWizard walks through the preferences with live prices and stock, saves them and returns them.
 func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (prefs, error) {
 	types, err := api.ServerTypes(ctx)
@@ -66,22 +87,23 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 		fmt.Fprintf(w, "  %d\t%s\t%s, %s\n", i+1, l.Name, l.City, l.Country)
 	}
 	_ = w.Flush()
-	for {
-		chosen, err := pickLocations(a.ask("Numbers or names in the order to try them, comma-separated:", strings.Join(p.Locations, ",")), locs)
-		if err == nil {
-			p.Locations = chosen
-			break
-		}
-		fmt.Fprintln(out, " ", err)
+	ans, err := a.text("Locations, numbers or names in the order to try them:", strings.Join(p.Locations, ","), func(s string) error {
+		_, err := pickLocations(s, locs)
+		return err
+	})
+	if err != nil {
+		return p, err
+	}
+	if p.Locations, err = pickLocations(ans, locs); err != nil {
+		return p, err
 	}
 
 	fmt.Fprintln(out, "\nWhich server types? Cheapest shared ones in those locations (per month, before VAT, IPv4 included):")
-	all := buy.Wants{Locations: p.Locations}.Candidates(types, prices.IPv4)
-	seen := map[string]bool{}
 	avail := buy.Availability(types)
+	seen := map[string]bool{}
 	w = tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "  TYPE\tCORES\tMEMORY\tARCH\tFROM\tIN STOCK NOW")
-	for _, c := range all {
+	for _, c := range (buy.Wants{Locations: p.Locations}).Candidates(types, prices.IPv4) {
 		if seen[c.Type] || len(seen) == 10 {
 			continue
 		}
@@ -99,85 +121,90 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 		fmt.Fprintf(w, "  %s\t%d\t%.0f GB\t%s\t%s\t%s\n", c.Type, c.Cores, c.Memory, c.Arch, buy.Money(c.Price, prices.Currency), stock)
 	}
 	_ = w.Flush()
-	fmt.Fprintln(out, "  `closedvps types --all` lists every type, dedicated ones included.")
+	fmt.Fprintln(out, "  `closedvps types --all` lists every type, dedicated ones included. A type can carry its own")
+	fmt.Fprintln(out, "  monthly cap, like cx23:6,cx33:12, and the others share the cap asked next. \"any\" tries the")
+	fmt.Fprintln(out, "  cheapest shared type in stock.")
 	known := map[string]bool{}
 	for _, t := range types {
 		known[t.Name] = true
 	}
-	fmt.Fprintln(out, "  A type can carry its own monthly cap, like cx23:6,cx33:12; the others share the cap asked next.")
-	for {
-		def := strings.Join(p.Types, ",")
-		if def == "" {
-			def = "any"
+	def := strings.Join(p.Types, ",")
+	if def == "" {
+		def = "any"
+	}
+	ans, err = a.text("Types in the order to try them:", def, func(s string) error {
+		if strings.EqualFold(s, "any") {
+			return nil
 		}
-		ans := a.ask("Types in the order to try them, or \"any\" for the cheapest shared type in stock:", def)
-		if strings.EqualFold(ans, "any") {
-			p.Types = nil
-			break
-		}
-		list := splitList(ans)
-		names, _, err := buy.ParseTypes(list)
+		names, _, err := buy.ParseTypes(splitList(s))
 		if err != nil {
-			fmt.Fprintln(out, " ", err)
-			continue
+			return err
 		}
-		bad := ""
 		for _, t := range names {
 			if !known[t] {
-				bad = t
+				return fmt.Errorf("Hetzner has no type %q", t)
 			}
 		}
-		if bad == "" && len(names) > 0 {
-			p.Types = list
-			break
-		}
-		fmt.Fprintf(out, "  Hetzner has no type %q.\n", bad)
+		return nil
+	})
+	if err != nil {
+		return p, err
+	}
+	if p.Types = splitList(ans); strings.EqualFold(ans, "any") {
+		p.Types = nil
 	}
 
 	fmt.Fprintln(out, "\nHetzner Backups keep 7 daily copies of the whole server for 20% of its price.")
-	p.Backups = a.confirm("Turn on backups?", p.Backups)
-
-	for {
-		what := "server and IPv4"
-		if p.Backups {
-			what = "server, IPv4 and backups"
-		}
-		ans := a.ask(fmt.Sprintf("Most you'll pay per month for each server's %s, in %s before VAT:", what, currencyOr(prices.Currency)), strconv.FormatFloat(p.MaxPrice, 'f', -1, 64))
-		if v, ok := parseMoney(ans); ok {
-			p.MaxPrice = v
-			break
-		}
-		fmt.Fprintln(out, "  A number above 0, please.")
+	if err := a.question(huh.NewConfirm().Title("Turn on backups?").Value(&p.Backups), func() string {
+		return "Turn on backups? " + map[bool]string{true: "Yes", false: "No"}[p.Backups]
+	}); err != nil {
+		return p, err
 	}
+
+	what := "its IPv4"
+	if p.Backups {
+		what = "its IPv4 and backups"
+	}
+	ans, err = a.text(fmt.Sprintf("Most you'll pay per month for one server with %s, in %s before VAT:", what, currencyOr(prices.Currency)),
+		strconv.FormatFloat(p.MaxPrice, 'f', -1, 64), func(s string) error {
+			if _, ok := parseMoney(s); !ok {
+				return errors.New("a number above 0, please")
+			}
+			return nil
+		})
+	if err != nil {
+		return p, err
+	}
+	p.MaxPrice, _ = parseMoney(ans)
 	names, caps, _ := buy.ParseTypes(p.Types)
 	wants := buy.Wants{Types: names, Caps: caps, Locations: p.Locations, MaxPrice: p.MaxPrice, Backups: p.Backups}
 	if len(wants.Candidates(types, prices.IPv4)) == 0 {
 		fmt.Fprintln(out, "  Nothing on your list costs that little, so `closedvps create` won't find anything. Run setup again with a higher cap.")
 	}
-	for {
-		def := "none"
-		if p.MaxTotal > 0 {
-			def = strconv.FormatFloat(p.MaxTotal, 'f', -1, 64)
-		}
-		ans := a.ask("Most all your closedvps servers in this Hetzner project may cost together per month, or \"none\":", def)
-		if strings.EqualFold(ans, "none") {
-			p.MaxTotal = 0
-			break
-		}
-		if v, ok := parseMoney(ans); ok && v >= p.MaxPrice {
-			p.MaxTotal = v
-			break
-		}
-		fmt.Fprintf(out, "  A number of at least %s (one server), or none.\n", strconv.FormatFloat(p.MaxPrice, 'f', -1, 64))
-	}
 
-	for {
-		u := a.ask("\nLinux user name on the server:", p.User)
-		if cloudinit.ValidUser(u) {
-			p.User = u
-			break
+	def = "none"
+	if p.MaxTotal > 0 {
+		def = strconv.FormatFloat(p.MaxTotal, 'f', -1, 64)
+	}
+	ans, err = a.text("Most all your closedvps servers in this Hetzner project may cost together per month, or \"none\":", def, func(s string) error {
+		if v, ok := parseMoney(s); strings.EqualFold(s, "none") || (ok && v >= p.MaxPrice) {
+			return nil
 		}
-		fmt.Fprintln(out, "  Lowercase letters, digits, _ and -, starting with a letter, and not a system name like root.")
+		return fmt.Errorf("a number of at least %s (one server), or none", strconv.FormatFloat(p.MaxPrice, 'f', -1, 64))
+	})
+	if err != nil {
+		return p, err
+	}
+	p.MaxTotal, _ = parseMoney(ans) // "none" reads as 0, no limit
+
+	fmt.Fprintln(out)
+	if p.User, err = a.text("Linux user name on the server:", p.User, func(s string) error {
+		if !cloudinit.ValidUser(s) {
+			return errors.New("lowercase letters, digits, _ and -, starting with a letter, and not a system name like root")
+		}
+		return nil
+	}); err != nil {
+		return p, err
 	}
 
 	if err := a.setupAlerts(ctx); err != nil {
@@ -199,103 +226,108 @@ func parseMoney(s string) (float64, bool) {
 }
 
 // setupAlerts asks where remote alerts go, saves the links as a secret and sends a test message. Only
-// "none" deletes saved links; an answer with a step that failed is asked again.
+// "None" deletes saved links; a step that fails leaves them as they were.
 func (a *app) setupAlerts(ctx context.Context) error {
 	out := a.stderr
-	saved := linksStore.get()
 	fmt.Fprintln(out, "\nWaiting for stock can take hours. This computer shows a notification when a server is bought and")
-	fmt.Fprintln(out, "when it's ready. To get those on your phone or in a chat too, give one or more of these, comma-separated:")
-	fmt.Fprintln(out, "  ntfy              a new private topic in the free ntfy app")
-	fmt.Fprintln(out, "  telegram          connects a Telegram bot you make with @BotFather")
-	fmt.Fprintln(out, "  a link            a Discord or Slack webhook, an ntfy topic, or any https webhook")
-	fmt.Fprintln(out, "  none              alerts stay on this computer")
-	fmt.Fprintln(out, "Messages name the server, type and price. The \"ready\" one is sent by the new server itself.")
-	def := "none"
-	if saved != "" {
-		def = "keep"
-		if links, err := alert.Parse(saved); err == nil {
-			var n []string
-			for _, l := range links {
-				n = append(n, l.Name())
-			}
-			fmt.Fprintf(out, "Now: %s.\n", strings.Join(n, ", "))
+	fmt.Fprintln(out, "when it's ready. Messages name the server, type and price; the \"ready\" one comes from the new server.")
+	const keep, ntfy, telegram, links, none = "keep", "ntfy", "telegram", "links", "none"
+	var opts []huh.Option[string]
+	choice := none
+	if saved, err := alert.Parse(linksStore.get()); err == nil && len(saved) > 0 {
+		var n []string
+		for _, l := range saved {
+			n = append(n, l.Name())
 		}
+		opts = append(opts, huh.NewOption("Keep: "+strings.Join(n, ", "), keep))
+		choice = keep
 	}
-ask:
-	for {
-		ans := strings.TrimSpace(a.ask("Alerts:", def))
-		switch strings.ToLower(ans) {
-		case "keep":
-			return nil
-		case "none", "":
-			_, err := linksStore.forget()
-			return err
-		}
-		var parts, tips []string
-		for _, part := range strings.Split(ans, ",") {
-			switch part = strings.TrimSpace(part); strings.ToLower(part) {
-			case "":
-			case "ntfy":
-				l := newNtfyLink()
-				parts = append(parts, l)
-				tips = append(tips, "In the ntfy app, tap +, and subscribe to "+strings.TrimPrefix(l, "https://ntfy.sh/")+". Anyone who knows that name can read the messages.")
-			case "telegram":
-				l, err := a.connectTelegram(ctx)
-				if err != nil {
-					fmt.Fprintln(out, " ", err)
-					if !a.tty {
-						return err
-					}
-					continue ask
-				}
-				parts = append(parts, l)
-			default:
-				parts = append(parts, part)
-			}
-		}
-		joined := strings.Join(parts, ",")
-		links, err := alert.Parse(joined)
-		if err != nil {
-			fmt.Fprintln(out, " ", err)
-			if !a.tty {
-				return err
-			}
-			continue
-		}
-		for _, t := range tips {
-			fmt.Fprintln(out, " ", t)
-		}
-		where, err := linksStore.save(joined)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(out, "  Saved in %s.\n", where)
-		if len(tips) > 0 {
-			a.ask("Press Enter once you've subscribed, for a test message.", "")
-		}
-		errs := alert.Send(ctx, a.http, links, alert.Message{Title: "closedvps test alert", Text: "Alerts from closedvps will arrive here."})
-		for _, e := range errs {
-			fmt.Fprintf(out, "  Test message failed for %v\n", e)
-		}
-		if len(errs) < len(links) {
-			fmt.Fprintln(out, "  Sent a test message. If it didn't arrive, run `closedvps setup` again.")
-		}
+	opts = append(opts,
+		huh.NewOption("ntfy app on your phone (a new private topic)", ntfy),
+		huh.NewOption("Telegram (a bot you make with @BotFather)", telegram),
+		huh.NewOption("Links: Discord or Slack webhooks, ntfy topics, any https webhook", links),
+		huh.NewOption("None, this computer only", none),
+	)
+	const title = "Send alerts to your phone or a chat too?"
+	if err := a.question(huh.NewSelect[string]().Title(title).Options(opts...).Value(&choice), func() string {
+		i := slices.IndexFunc(opts, func(o huh.Option[string]) bool { return o.Value == choice })
+		return title + " " + opts[i].Key
+	}); err != nil {
+		return err
+	}
+
+	var link, tip string
+	switch choice {
+	case keep:
 		return nil
+	case none:
+		_, err := linksStore.forget()
+		return err
+	case ntfy:
+		link = newNtfyLink()
+		tip = "In the ntfy app, tap +, and subscribe to " + strings.TrimPrefix(link, "https://ntfy.sh/") + ". Anyone who knows that name can read the messages."
+	case telegram:
+		var err error
+		if link, err = a.connectTelegram(ctx); err != nil {
+			return err
+		}
+	case links:
+		var err error
+		if link, err = a.text("Links, comma-separated:", "", func(s string) error {
+			_, err := alert.Parse(s)
+			return err
+		}); err != nil {
+			return err
+		}
 	}
+	parsed, err := alert.Parse(link)
+	if err != nil {
+		return err
+	}
+	if len(parsed) == 0 {
+		return errors.New("no alert links given; the saved ones are unchanged")
+	}
+	where, err := linksStore.save(link)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "  Saved in %s.\n", where)
+	if tip != "" {
+		fmt.Fprintln(out, " ", tip)
+		if err := a.question(huh.NewInput().Title("Press Enter once you've subscribed, for a test message."), nil); err != nil {
+			return err
+		}
+	}
+	errs := alert.Send(ctx, a.http, parsed, alert.Message{Title: "closedvps test alert", Text: "Alerts from closedvps will arrive here."})
+	for _, e := range errs {
+		fmt.Fprintf(out, "  Test message failed for %v\n", e)
+	}
+	if len(errs) < len(parsed) {
+		fmt.Fprintln(out, "  Sent a test message. If it didn't arrive, run `closedvps setup` again.")
+	}
+	return nil
 }
 
 func (a *app) connectTelegram(ctx context.Context) (string, error) {
 	fmt.Fprintln(a.stderr, "  In Telegram, message @BotFather with /newbot and copy the token it gives you.")
-	token, err := a.askSecret("  Bot token:")
+	var token string
+	in := huh.NewInput().Title("Bot token:").EchoMode(huh.EchoModePassword).Value(&token).Validate(func(s string) error {
+		if strings.TrimSpace(s) == "" {
+			return errors.New("paste the token")
+		}
+		return nil
+	})
+	if err := a.question(in, nil); err != nil {
+		return "", err
+	}
+	if err := a.question(huh.NewInput().Title("Now send any message to your new bot in Telegram, then press Enter here."), nil); err != nil {
+		return "", err
+	}
+	chat, err := alert.TelegramChat(ctx, a.http, strings.TrimSpace(token))
 	if err != nil {
 		return "", err
 	}
-	a.ask("  Now send any message to your new bot in Telegram, then press Enter here.", "")
-	chat, err := alert.TelegramChat(ctx, a.http, token)
-	if err != nil {
-		return "", err
-	}
-	return alert.TelegramLink(token, chat), nil
+	return alert.TelegramLink(strings.TrimSpace(token), chat), nil
 }
 
 func pickLocations(ans string, locs []*hcloud.Location) ([]string, error) {

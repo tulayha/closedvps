@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"charm.land/huh/v2"
 	"github.com/gen2brain/beeep"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"golang.org/x/term"
@@ -133,18 +134,41 @@ func (a *app) confirm(q string, def bool) bool {
 	return def
 }
 
-// ask reads one line, with def used when the answer is empty.
-func (a *app) ask(q, def string) string {
-	if def != "" {
-		fmt.Fprintf(a.stderr, "%s [%s] ", q, def)
-	} else {
-		fmt.Fprintf(a.stderr, "%s ", q)
+// question asks one thing with huh: its full prompt in a terminal, plain numbered lines otherwise (pipes,
+// tests). Ctrl+C in the prompt stops the command like Ctrl+C anywhere else. huh clears a finished
+// prompt, so record, if given, prints the answer to keep it on screen.
+func (a *app) question(f huh.Field, record func() string) error {
+	if !a.tty {
+		return f.RunAccessible(a.stderr, &lineReader{r: a.in})
 	}
-	line, _ := a.in.ReadString('\n')
-	if line = strings.TrimSpace(line); line == "" {
-		return def
+	err := huh.NewForm(huh.NewGroup(f)).WithOutput(a.stderr).Run()
+	if errors.Is(err, huh.ErrUserAborted) {
+		return context.Canceled
 	}
-	return line
+	if err == nil && record != nil {
+		fmt.Fprintln(a.stderr, record())
+	}
+	return err
+}
+
+// lineReader gives out one line per Read. huh's plain prompts each wrap the reader in a new bufio.Scanner,
+// which would otherwise read ahead and swallow the answers to the questions after it.
+type lineReader struct {
+	r    *bufio.Reader
+	rest []byte
+}
+
+func (l *lineReader) Read(p []byte) (int, error) {
+	if len(l.rest) == 0 {
+		line, err := l.r.ReadBytes('\n')
+		if len(line) == 0 {
+			return 0, err
+		}
+		l.rest = line
+	}
+	n := copy(p, l.rest)
+	l.rest = l.rest[n:]
+	return n, nil
 }
 
 // hetznerToken finds the token: HCLOUD_TOKEN, then the saved one, then it asks and offers to save it.
