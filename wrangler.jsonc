@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "closedvps",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "routes": [{ "pattern": "closedvps.com", "custom_domain": true }],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+    // Only the install scripts go through the Worker, to be counted; every other file is served as is.
+    "run_worker_first": ["/install.sh", "/install.ps1"]
+  },
+  "analytics_engine_datasets": [{ "binding": "INSTALLS", "dataset": "closedvps_installs" }],
+  "observability": { "enabled": true }
+}
