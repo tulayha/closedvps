@@ -1,7 +1,8 @@
 /* closedvps.com. One scale for everything:
    text 18 lede, 16.5 section prose, 16 card titles, 15 card text, 13.5 small; mono 12 labels, 13 code
    radii 10 small (buttons, code), 16 cards and terminals, 22 big panels
-   spacing: heading to its intro 16, to the content 36, sections 120 apart (88 on phones) */
+   spacing: heading to its intro 16, to the content 36 (48 beside a split heading), sections and the
+   closing panel 120 apart (88 on phones) */
 :root {
   --bg: #f5f4ef; --paper: #fffefa; --ink: #1a1a18; --muted: #5d5c55; --soft: #8b8a82; --line: #e2dfd5; --line2: #d3cfc2;
   --accent: #0c7a4c; --accent-bg: #e3f1e8; --red: #b4342a; --red-bg: #f7e4e0;
@@ -58,7 +59,7 @@ h1 em { color: var(--accent); }
 h2 { margin: 0; max-width: 24ch; font-size: clamp(2rem, 4.6vw, 3rem); line-height: 1.05; font-variation-settings: 'opsz' 60; letter-spacing: -0.02em; }
 .eyebrow { font: 500 12px/1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
 .eyebrow + h2 { margin-top: 14px; }
-.sub, .channels, .after { margin: 16px 0 0; max-width: 40rem; font-size: 16.5px; line-height: 1.6; color: var(--muted); }
+.sub, .channels { margin: 16px 0 0; max-width: 40rem; font-size: 16.5px; line-height: 1.6; color: var(--muted); }
 section.block { padding-top: 120px; }
 
 /* hero and install */
@@ -135,20 +136,21 @@ html:not(.js) .steps, html:not(.js) .stage .nav { display: none; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* sold out: a timeline, with the alerts drawn as phone notifications */
-.timeline { position: relative; margin-top: 36px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.timeline::before { content: ""; position: absolute; left: 0; right: calc(25% - 12px); top: 11px; height: 2px; background: repeating-linear-gradient(90deg, var(--line2) 0 8px, transparent 8px 14px); }
+/* the two alert columns are wider so a notification reads in two lines */
+.timeline { position: relative; margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) repeat(2, minmax(0, 1.35fr)); }
+.timeline::before { content: ""; position: absolute; left: 0; right: calc(100% * 1.35 / 4.7 - 12px); top: 11px; height: 2px; background: repeating-linear-gradient(90deg, var(--line2) 0 8px, transparent 8px 14px); }
 .tick { position: relative; padding-right: 18px; }
 .tick .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--paper); border: 2px solid var(--line2); }
 .tick.done .dot { background: var(--accent); border-color: var(--accent); }
 .tick time { display: block; margin-top: 14px; font: 12px/1.5 var(--mono); color: var(--soft); }
 .tick .t { margin-top: 2px; font-weight: 600; font-size: 16px; }
-.tick p { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+.tick p { margin: 4px 0 0; font-size: 15px; color: var(--muted); text-wrap: balance; }
 .note { margin-top: 10px; display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; padding: 14px; border-radius: 16px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 8px 24px -14px var(--shadow); }
 .note .app { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--solid); color: var(--on-solid); }
 .note .app svg { width: 16px; height: 16px; }
 .note .meta { display: flex; justify-content: space-between; gap: 8px; font: 12px/1.5 var(--mono); color: var(--soft); }
 .note .t { margin-top: 1px; font-weight: 600; font-size: 15px; }
-.note .x { font-size: 15px; color: var(--muted); }
+.note .x { font-size: 13.5px; color: var(--muted); }
 .note .x code { font-size: 13px; }
 .channels { margin-top: 28px; }
 
@@ -175,14 +177,11 @@ html:not(.js) .steps, html:not(.js) .stage .nav { display: none; }
 .needs .ic { flex: none; width: 38px; height: 38px; margin-bottom: 14px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-bg); color: var(--accent); }
 .needs b { display: block; font-weight: 600; font-size: 16px; }
 .needs span { display: block; margin-top: 4px; font-size: 15px; color: var(--muted); }
-.after { margin-top: 24px; }
-.after a { color: var(--ink); text-underline-offset: 3px; }
+.sub a { color: var(--ink); text-underline-offset: 3px; }
 .needs .how { display: flex; gap: 16px; margin-top: auto; padding-top: 12px; font-size: 13.5px; }
 .needs .how a { color: var(--accent); font-weight: 500; text-underline-offset: 3px; }
 
-.two { display: grid; gap: 26px; align-items: center; }
-.two > * { min-width: 0; }
-.term { margin: 0; padding: 16px 18px; border-radius: 16px; background: var(--term); border: 1px solid var(--stage-line); color: var(--tfg); font: 13px/1.8 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.term { margin: 36px 0 0; padding: 16px 18px; border-radius: 16px; background: var(--term); border: 1px solid var(--stage-line); color: var(--tfg); font: 13px/1.8 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .cta { margin-top: 120px; display: block; padding: 32px 28px; text-align: center; border-radius: 22px; background: var(--solid); color: var(--on-solid); text-decoration: none; border: 1px solid var(--line); }
 .cta .s { font-size: 14px; color: var(--on-solid-dim); }
@@ -206,7 +205,14 @@ footer a:hover { color: var(--ink); }
 @media (min-width: 880px) {
   .run { grid-template-columns: 300px 1fr; gap: 28px; }
   .needs { grid-template-columns: repeat(3, 1fr); }
-  .two { grid-template-columns: 1fr 1fr; }
+  /* headings on the left, every paragraph in the right column, visuals across both */
+  section.block { display: grid; grid-template-columns: 5fr 7fr; column-gap: 48px; align-items: baseline; }
+  section.block > * { grid-column: 1 / -1; }
+  section.block > :is(h2, .eyebrow) { grid-column: 1; }
+  section.block > :is(.sub, .channels, .aside) { grid-column: 2; max-width: none; }
+  section.block > .sub, .aside > .sub { margin-top: 0; }
+  .aside > .term { margin-top: 24px; }
+  section.block > :is(.run, .timeline, .sheet, .needs) { margin-top: 48px; }
 }
 @media (max-width: 879px) {
   .steps { grid-template-columns: 1fr 1fr; }
@@ -216,6 +222,7 @@ footer a:hover { color: var(--ink); }
 }
 @media (max-width: 760px) {
   section.block { padding-top: 88px; }
+  .cta { margin-top: 88px; }
   .hero { padding-top: 48px; }
   .lede { font-size: 16.5px; }
   .map { grid-template-columns: 1fr; gap: 4px; justify-items: center; padding: 24px 18px; }
