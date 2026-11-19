@@ -14,78 +14,58 @@
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/style.css">
-<script>if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.classList.add("dark");</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
+<link rel="stylesheet" href="/site.css">
 </head>
-<body class="bg-background text-foreground">
-<div class="mx-auto max-w-6xl px-4 sm:px-6">
-<header class="flex items-center justify-between py-6 text-sm">
-  <a href="/" class="flex items-center gap-2 font-medium"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>ClosedVPS</a>
-  <nav class="flex gap-5 text-muted-foreground">
-    <a class="hover:text-foreground" href="/guide">Guide</a>
-    <a class="hover:text-foreground" href="https://github.com/tulayha/closedvps">GitHub</a>
-  </nav>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="/"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>ClosedVPS</a>
+  <nav><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a></nav>
 </header>
-<main>
-<article class="mx-auto max-w-3xl pt-12 pb-20 prose-site">
-  <h1 class="text-4xl font-semibold tracking-[-0.03em] leading-tight text-foreground">How to lock down a Hetzner VPS by hand</h1>
-  <p class="mt-6">
-    These steps give a new Hetzner server no open ports, SSH only over Tailscale and automatic security
+<main class="doc">
+  <h1>How to lock down a Hetzner VPS by hand</h1>
+  <p>These steps give a new Hetzner server no open ports, SSH only over Tailscale and automatic security
     updates. <a href="/">ClosedVPS</a> does this in one command, adds a non-root user, and keeps trying while Hetzner is sold out. The server joins Tailscale on its first boot, so port 22 is never open to the internet. If you lock
     yourself out, add an inbound rule for TCP 22 from your own IP to the firewall, SSH to the public IP, fix
     Tailscale and delete the rule. On a server that's already running, install Tailscale and SSH in over it
-    before you attach the firewall.
-  </p>
+    before you attach the firewall.</p>
 
-  <h2 class="mt-10 text-lg font-medium text-foreground">1. Make the firewall first</h2>
-  <p>
-    In the Hetzner Console open Firewalls, Create Firewall, delete the SSH and ICMP rules it suggests, and save.
-    A Hetzner firewall with no inbound rules drops every incoming packet. Outbound stays open.
-  </p>
+  <h2>1. Make the firewall first</h2>
+  <p>In the Hetzner Console open Firewalls, Create Firewall, delete the SSH and ICMP rules it suggests, and save.
+    A Hetzner firewall with no inbound rules drops every incoming packet. Outbound stays open.</p>
 
-  <h2 class="mt-10 text-lg font-medium text-foreground">2. Create the server with Tailscale in its first boot</h2>
-  <p>
-    Make a one-off auth key at login.tailscale.com/admin/settings/keys. Create the server with your SSH key,
+  <h2>2. Create the server with Tailscale in its first boot</h2>
+  <p>Make a one-off auth key at login.tailscale.com/admin/settings/keys. Create the server with your SSH key,
     the new firewall selected, and this under Cloud config. Once it shows up in the Tailscale admin, turn off
-    key expiry for it, or it drops off your tailnet after 180 days.
-  </p>
-  <div class="term mt-4"><pre>#cloud-config
+    key expiry for it, or it drops off your tailnet after 180 days.</p>
+  <pre class="term">#cloud-config
 runcmd:
   - curl -fsSL https://tailscale.com/install.sh -o /tmp/ts.sh
   - sh /tmp/ts.sh
-  - tailscale up --auth-key=tskey-auth-XXXX --hostname=vps</pre></div>
+  - tailscale up --auth-key=tskey-auth-XXXX --hostname=vps</pre>
 
-  <h2 class="mt-10 text-lg font-medium text-foreground">3. Turn off SSH passwords</h2>
+  <h2>3. Turn off SSH passwords</h2>
   <p>Then <code>ssh root@vps</code> and run:</p>
-  <div class="term mt-4"><pre>cat &gt; /etc/ssh/sshd_config.d/10-local.conf &lt;&lt;'END'
+  <pre class="term">cat &gt; /etc/ssh/sshd_config.d/10-local.conf &lt;&lt;'END'
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 END
-systemctl restart ssh</pre></div>
+systemctl restart ssh</pre>
 
-  <h2 class="mt-10 text-lg font-medium text-foreground">4. Let security updates reboot it</h2>
+  <h2>4. Let security updates reboot it</h2>
   <p>Ubuntu already installs security updates every day. A kernel update only takes effect after a reboot, so let it reboot at 04:00 UTC when one is needed:</p>
-  <div class="term mt-4"><pre>cat &gt; /etc/apt/apt.conf.d/52reboot &lt;&lt;'END'
+  <pre class="term">cat &gt; /etc/apt/apt.conf.d/52reboot &lt;&lt;'END'
 Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "04:00";
-END</pre></div>
+END</pre>
 
-  <h2 class="mt-10 text-lg font-medium text-foreground">5. Serve websites through Cloudflare Tunnel</h2>
-  <p>
-    In the Cloudflare dashboard go to Networking, Tunnels, Create a tunnel, and run the install command it shows
+  <h2>5. Serve websites through Cloudflare Tunnel</h2>
+  <p>In the Cloudflare dashboard go to Networking, Tunnels, Create a tunnel, and run the install command it shows
     on the server. Then on the tunnel's Routes tab add a published application with the service URL
-    <code>http://127.0.0.1:3000</code> (your app's port). The tunnel connects outward, so the firewall stays shut.
-  </p>
-</article>
+    <code>http://127.0.0.1:3000</code> (your app's port). The tunnel connects outward, so the firewall stays shut.</p>
 </main>
-<footer class="border-t py-6 mt-8 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
-  <span>MIT licensed</span>
-  <a class="hover:text-foreground" href="https://github.com/tulayha/closedvps">Source</a>
-  <a class="hover:text-foreground" href="https://github.com/tulayha/closedvps#security-model">Security model</a>
-  <a class="hover:text-foreground" href="/llms.txt">llms.txt</a>
-</footer>
+<footer><span>MIT licensed</span><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
 </div>
-
 </body>
 </html>

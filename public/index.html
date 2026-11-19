@@ -14,12 +14,10 @@
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/style.css">
-<script>if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.classList.add("dark");</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
+<link rel="stylesheet" href="/site.css">
 <link rel="alternate" type="text/markdown" href="/index.md">
-<script src="/js/basecoat.min.js" defer></script>
-<script src="/js/tabs.min.js" defer></script>
+<script>document.documentElement.classList.add("js");</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -38,131 +36,195 @@
 }
 </script>
 </head>
-<body class="bg-background text-foreground">
-<div class="mx-auto max-w-6xl px-4 sm:px-6">
-<header class="flex items-center justify-between py-6 text-sm">
-  <a href="/" class="flex items-center gap-2 font-medium"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>ClosedVPS</a>
-  <nav class="flex gap-5 text-muted-foreground">
-    <a class="hover:text-foreground" href="/guide">Guide</a>
-    <a class="hover:text-foreground" href="https://github.com/tulayha/closedvps">GitHub</a>
-  </nav>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="/"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>ClosedVPS</a>
+  <nav><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a></nav>
 </header>
 <main>
-<section class="pt-14 pb-12 text-center">
-  <h1 class="mx-auto max-w-3xl text-4xl sm:text-6xl font-semibold tracking-[-0.045em] leading-[1.02]">A Hetzner server with every port closed.</h1>
-  <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">ClosedVPS buys it from your own computer. When Hetzner is sold out, it checks every minute and buys the first server on your list that comes into stock, up to the price you set. You get in over Tailscale.</p>
-  <div class="mx-auto mt-9 max-w-xl"><div class="tabs w-full [&>nav]:self-center" id="install">
-    <nav role="tablist" aria-orientation="horizontal">
-      <button type="button" role="tab" id="install-unix-tab" aria-controls="install-unix" aria-selected="true" tabindex="0">macOS and Linux</button>
-      <button type="button" role="tab" id="install-win-tab" aria-controls="install-win" aria-selected="false" tabindex="-1">Windows</button>
-    </nav>
-    <div role="tabpanel" id="install-unix" aria-labelledby="install-unix-tab" tabindex="-1">
-      <div class="relative mt-3 text-left"><button type="button" class="btn absolute top-2 right-2" data-variant="ghost" data-size="icon-sm" data-copy="curl -fsSL https://closedvps.com/install.sh | sh" aria-label="Copy install command"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><div class="term"><pre><span class="dim">$</span> curl -fsSL https://closedvps.com/install.sh | sh
-<span class="dim">$</span> closedvps create</pre></div></div>
-    </div>
-    <div role="tabpanel" id="install-win" aria-labelledby="install-win-tab" tabindex="-1" hidden>
-      <div class="relative mt-3 text-left"><button type="button" class="btn absolute top-2 right-2" data-variant="ghost" data-size="icon-sm" data-copy="irm https://closedvps.com/install.ps1 | iex" aria-label="Copy install command"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><div class="term"><pre><span class="dim">PS&gt;</span> irm https://closedvps.com/install.ps1 | iex
-<span class="dim">PS&gt;</span> closedvps create</pre></div></div>
-    </div>
-  </div></div>
-  <p class="mt-5 text-sm text-muted-foreground">Open source, MIT · macOS, Linux and Windows · Runs on your computer, no ClosedVPS account · Your Hetzner token only goes to Hetzner's API</p>
+
+<section class="hero">
+  <div class="eyebrow">A free CLI for Hetzner Cloud</div>
+  <h1>A Hetzner server with <em>every port closed.</em></h1>
+  <p class="lede">ClosedVPS buys it from your own computer. <b>When Hetzner is sold out, it checks every minute</b> and buys the first server on your list that comes into stock, up to the price you set. You get in over Tailscale.</p>
+  <div class="install">
+    <div class="tabs" role="tablist" aria-label="Your computer"><button role="tab" data-os="unix" aria-selected="true">macOS and Linux</button><button role="tab" data-os="win" aria-selected="false">Windows</button></div>
+    <div data-cmd="unix"><div class="cmd"><code><span class="dim">$</span> curl -fsSL https://closedvps.com/install.sh | sh</code><button class="copy" data-copy="curl -fsSL https://closedvps.com/install.sh | sh" aria-label="Copy install command"><svg class="i cp-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><svg class="i ok-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M20 6 9 17l-5-5" /></svg></button></div></div>
+    <div data-cmd="win" hidden><div class="cmd"><code><span class="dim">PS&gt;</span> irm https://closedvps.com/install.ps1 | iex</code><button class="copy" data-copy="irm https://closedvps.com/install.ps1 | iex" aria-label="Copy install command"><svg class="i cp-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><svg class="i ok-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M20 6 9 17l-5-5" /></svg></button></div></div>
+  </div>
+  <div class="facts"><span>Open source, MIT</span><span>macOS, Linux, Windows</span><span>No ClosedVPS account</span><span>Your token only goes to Hetzner</span></div>
 </section>
-<figure class="window mx-auto max-w-4xl" aria-label="A ClosedVPS run: waiting for stock, buying, then the server unreachable from the internet but reachable over Tailscale">
-  <div class="label">Example run, 19 Nov 2026</div>
-<pre id="story"><span class="ln"><span class="dim">$</span> <span class="b">closedvps create</span></span><span class="ln">Buys the first of these Hetzner has in stock (per month with IPv4 and backups, before VAT):</span><span class="ln">  <span class="b">cx23</span>   nbg1   2 cores    4 GB x86  <span class="hl">7.09 EUR/month</span></span><span class="ln">  <span class="b">cax11</span>  hel1   2 cores    4 GB arm  <span class="hl">7.69 EUR/month</span></span><span class="ln">Buy it? [y/N] <span class="b">y</span></span><span class="ln">Firewall closedvps-vps ready, <span class="ok">no inbound rules</span></span><span class="ln"><span class="dim">09:14:02</span>  <span class="warn">nothing on your list is in stock</span> <span class="dim">(check 1)</span></span><span class="ln"><span class="dim">Trying again every minute until one is bought. Ctrl+C stops.</span></span><span class="ln"><span class="dim">... 2 hours later ...</span></span><span class="ln"><span class="dim">11:43:02</span>  <span class="ok">cax11 hel1   vps bought</span>, <span class="hl">7.69 EUR/month</span></span><span class="ln">vps is running at 203.0.113.1, <span class="ok">unreachable from the internet</span>.</span><span class="ln">Backups are on.</span><span class="ln">First-boot setup takes 3 to 5 minutes.</span><span class="ln">Waiting for vps to join your tailnet............ <span class="ok">online</span></span><span class="ln"><span class="b ok">Ready: ssh dev@vps</span></span><span class="ln"><span class="warn">In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.</span></span><span class="ln"><span class="dim">$</span> <span class="b">nmap -Pn 203.0.113.1</span></span><span class="ln">All 1000 scanned ports on 203.0.113.1 are in ignored states.</span><span class="ln">Not shown: <span class="ok">1000 filtered tcp ports</span> (no-response)</span><span class="ln"><span class="dim">$</span> <span class="b">ssh dev@vps</span></span><span class="ln"><span class="ok">dev@vps</span>:<span class="hl">~</span>$ <span class="cursor"></span></span></pre>
-</figure>
-<section class="mx-auto max-w-3xl pt-20" id="sold-out">
-  <h2 class="text-2xl font-semibold tracking-tight">When Hetzner is sold out</h2>
-  <p class="mt-4 text-[15px] leading-7 text-muted-foreground">Since June 2026 Hetzner often shows its cheaper types as unavailable, and it refuses new servers on new
-    accounts and on some older ones chosen at random (<a class="underline underline-offset-4 hover:text-foreground" href="https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/">a write-up of what changed</a>).
-    ClosedVPS takes any refusal that waiting can fix as another round. One it can't fix, such as a bad token or a
-    full account limit, stops it with Hetzner's own message. While it waits it keeps your computer from sleeping
-    on idle, but closing a laptop lid still stops it.</p>
-  <p class="mt-4 text-[15px] leading-7 text-muted-foreground">Your computer shows a notification when it buys a server, when the server answers SSH over your tailnet,
-    and if it stops without buying. Give it an ntfy, Discord, Slack or Telegram link, or any webhook, and the
-    alerts go there too; the "ready" one comes from the new server itself. For waits longer than a laptop stays
-    open, run it on any machine that stays on, in Docker if you like.</p>
-</section>
-<section class="mx-auto max-w-3xl pt-20" id="what-you-get">
-  <h2 class="text-2xl font-semibold tracking-tight">What you get</h2>
-  <dl class="spec mt-6">
-    <dt>Hetzner firewall</dt><dd>No inbound rules, attached in the same API call that creates the server, so it never boots open. If another firewall in your project lets traffic in, ClosedVPS warns you, and <code class="font-mono text-[13px] text-foreground">closedvps list</code> checks again any time.</dd>
-    <dt>SSH over Tailscale</dt><dd>Key login only, for one user named after your account on this computer. Root can't log in.</dd>
-    <dt>Security updates</dt><dd>Installed daily, with a reboot at 04:00 UTC when one needs it.</dd>
-    <dt>Several at once</dt><dd><code class="font-mono text-[13px] text-foreground">--count 10</code> buys ten as stock appears. A cap per server type and one for all your servers together keep the bill where you set it.</dd>
-    <dt>Backups</dt><dd>Hetzner keeps 7 daily copies for 20% of the server price. On unless you turn them off.</dd>
-    <dt>Cloudflare Tunnel</dt><dd>Runs your tunnel when you pass <code class="font-mono text-[13px] text-foreground">CLOUDFLARE_TUNNEL_TOKEN</code>, for sites you want public.</dd>
-    <dt>Docker</dt><dd>If you install it later, ports you publish bind to 127.0.0.1. To reach one from your laptop, publish it on the server's Tailscale IP (<code class="font-mono text-[13px] text-foreground">-p 100.x.y.z:3000:3000</code>).</dd>
-    <dt>Claude Code</dt><dd>With <code class="font-mono text-[13px] text-foreground">--claude</code>. You log in to your own account.</dd>
-  </dl>
-  <p class="mt-4 text-[15px] leading-7 text-muted-foreground">You need a Hetzner API token with Read &amp; Write, a Tailscale auth key and an SSH key on this computer.
-    The first run asks for the token and offers to keep it in your system's password store. Then it asks where
-    and what to buy, your price caps, backups, your user name and where alerts go, and remembers the answers. The
-    Tailscale key is asked for on every run and never saved.</p>
-  <p class="mt-4 text-[15px] leading-7 text-muted-foreground"><code class="font-mono text-[13px] text-foreground">closedvps create --dry-run</code> prints the whole first-boot setup before you pay for
-    anything. To get rid of a server, delete it and its <code class="font-mono text-[13px] text-foreground">closedvps-vps</code> firewall in the
-    Hetzner Console, and remove it from your Tailscale admin.</p>
-</section>
-<section class="mx-auto max-w-3xl pt-20" id="locked-out">
-  <h2 class="text-2xl font-semibold tracking-tight">If Tailscale stops working</h2>
-  <p class="mt-4 text-[15px] leading-7 text-muted-foreground"><code class="font-mono text-[13px] text-foreground">closedvps open-ssh vps</code> opens port 22 to your current IPv4 address, so you can SSH to
-    the server's public IP and fix Tailscale. <code class="font-mono text-[13px] text-foreground">closedvps close-ssh vps</code> shuts it again.</p>
-</section>
-<div class="mx-auto max-w-3xl py-20">
-<a href="/guide" class="card block p-5 hover:bg-muted/50 transition-colors">
-  <span class="text-sm text-muted-foreground">Rather do it yourself?</span>
-  <span class="mt-1 block font-medium">How to lock down a Hetzner VPS by hand &rarr;</span>
-</a>
+
+<div class="map" role="img" aria-label="The internet is blocked by a Hetzner firewall with no inbound rules; your laptop reaches the server over Tailscale">
+  <div class="side left">
+    <div class="node"><div class="ic"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg></div><b>The internet</b></div>
+    <div class="wire no"><i>✕</i><span>0 inbound rules</span></div>
+  </div>
+  <div class="node server"><div class="ic"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></svg></div><b>Your server</b>Hetzner Cloud</div>
+  <div class="side right">
+    <div class="wire yes"><i>✓</i><span>Tailscale</span></div>
+    <div class="node"><div class="ic"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16" /></svg></div><b>Your laptop</b></div>
+  </div>
 </div>
+<p class="mapnote">Tailscale connects outward from the server, so the firewall never has to let anything in.</p>
+
+<section class="block" id="run">
+  <h2>An example run</h2>
+  <p class="sub">From 19 Nov 2026, with that day's prices.</p>
+  <div class="run">
+    <div class="steps" role="tablist" aria-label="Steps of the run">
+      <button role="tab" data-step="0" aria-selected="true"><span class="n">1</span><span class="t">Waits for stock</span><span class="d">Nothing on your list is in stock, so it checks every minute.</span><svg class="i go" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m9 18 6-6-6-6" /></svg><i class="bar"></i></button>
+      <button role="tab" data-step="1" aria-selected="false"><span class="n">2</span><span class="t">Buys a server</span><span class="d">The first type on your list that comes into stock, within your cap.</span><svg class="i go" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m9 18 6-6-6-6" /></svg><i class="bar"></i></button>
+      <button role="tab" data-step="2" aria-selected="false"><span class="n">3</span><span class="t">Sets it up</span><span class="d">Tailscale, security updates and your user, on first boot.</span><svg class="i go" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m9 18 6-6-6-6" /></svg><i class="bar"></i></button>
+      <button role="tab" data-step="3" aria-selected="false"><span class="n">4</span><span class="t">Checking from outside</span><span class="d">nmap from outside finds every port filtered, and ssh works over Tailscale.</span><svg class="i go" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m9 18 6-6-6-6" /></svg><i class="bar"></i></button>
+    </div>
+    <figure class="stage" style="margin:0" aria-label="A ClosedVPS run: waiting for stock, buying, then the server unreachable from the internet but reachable over Tailscale">
+      <div class="bar-top"><span>closedvps create</span><span class="nav"><button id="prev" aria-label="Previous step"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m15 18-6-6 6-6" /></svg></button><span id="stepname">1 of 4</span><button id="next" aria-label="Next step"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m9 18 6-6-6-6" /></svg></button></span></div>
+      <div class="pane" id="pane"><pre id="story"><span class="ln"><span class="dim">$</span> <span class="b">closedvps create</span></span><span class="ln">Buys the first of these Hetzner has in stock (per month with IPv4, before VAT):</span><span class="ln">  <span class="b">cx23</span>   nbg1   2 cores    4 GB x86  <span class="hl">5.99 EUR/month</span></span><span class="ln">  <span class="b">cax11</span>  hel1   2 cores    4 GB arm  <span class="hl">6.49 EUR/month</span></span><span class="ln">Buy it? [y/N] <span class="b">y</span></span><span class="ln">Firewall closedvps-vps ready, <span class="ok">no inbound rules</span></span><span class="ln"><span class="dim">09:14:02</span>  <span class="warn">nothing on your list is in stock</span> <span class="dim">(check 1)</span></span><span class="ln"><span class="dim">Trying again every minute until one is bought. Ctrl+C stops.</span></span><span class="ln"><span class="dim">... 2 hours later ...</span></span><span class="ln"><span class="dim">11:43:02</span>  <span class="ok">cax11 hel1   vps bought</span>, <span class="hl">6.49 EUR/month</span></span><span class="ln">vps is running at 203.0.113.1, <span class="ok">unreachable from the internet</span>.</span><span class="ln">First-boot setup takes 3 to 5 minutes.</span><span class="ln">Waiting for vps to join your tailnet............ <span class="ok">online</span></span><span class="ln"><span class="b ok">Ready: ssh dev@vps</span></span><span class="ln"><span class="warn">In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.</span></span><span class="ln"><span class="dim">$</span> <span class="b">nmap -Pn 203.0.113.1</span></span><span class="ln">All 1000 scanned ports on 203.0.113.1 are in ignored states.</span><span class="ln">Not shown: <span class="ok">1000 filtered tcp ports</span> (no-response)</span><span class="ln"><span class="dim">$</span> <span class="b">ssh dev@vps</span></span><span class="ln"><span class="ok">dev@vps</span>:<span class="hl">~</span>$ <span class="cursor"></span></span></pre></div>
+    </figure>
+  </div>
+</section>
+
+<section class="block" id="sold-out">
+  <h2>When Hetzner is sold out</h2>
+  <p class="sub">Since June 2026 Hetzner often shows its cheaper types as unavailable, and refuses new servers on new accounts and some older ones (<a href="https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/">what changed</a>). Any refusal that waiting can fix is another round. One it can't, like a bad token, stops it with Hetzner's own message.</p>
+  <div class="timeline">
+    <div class="tick done"><div class="dot"></div><time>09:14</time><div class="t">Check 1</div><p>Nothing on your list is in stock.</p></div>
+    <div class="tick"><div class="dot"></div><time>every minute</time><div class="t">Checks again</div><p>Your computer stays awake while it waits.</p></div>
+    <div class="tick done"><div class="dot"></div><time>11:43</time><div class="t">Buys one</div><div class="note"><div class="app"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></div><div><div class="meta"><span>closedvps</span><span>now</span></div><div class="t">vps bought</div><div class="x">cax11 in hel1, 6.49 EUR/month. Setting it up now.</div></div></div></div>
+    <div class="tick done"><div class="dot"></div><time>minutes later</time><div class="t">Ready to use</div><div class="note"><div class="app"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></div><div><div class="meta"><span>sent by the server</span><span>now</span></div><div class="t">vps is ready</div><div class="x"><code>ssh dev@vps</code></div></div></div></div>
+  </div>
+  <p class="channels">Alerts show on this computer, and on your phone or a chat if you give it an ntfy, Telegram, Discord or Slack link, or any webhook. For waits longer than a laptop stays open, run it on a machine that stays on, in Docker if you like.</p>
+</section>
+
+<section class="block" id="what-you-get">
+  <div class="eyebrow">What you get</div>
+  <h2>Locked down before it boots.</h2>
+  <div class="sheet">
+    <h3>On every server</h3>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg><div><div class="t">No inbound rules</div><p>A Hetzner firewall that lets nothing in, attached in the same call that creates the server, so it never boots open. <code>closedvps list</code> warns if another firewall opens it.</p></div>
+      <div class="proof"><small>from your laptop</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">nmap</span> <span class="tk">-Pn</span> <span class="tk">203.0.113.1</span></span><span class="ln"><span class="tk">Not</span> <span class="tk">shown:</span> <span class="tk"><span class="ok">1000</span></span> <span class="tk"><span class="ok">filtered</span></span> <span class="tk"><span class="ok">tcp</span></span> <span class="tk"><span class="ok">ports</span></span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="16" y="16" width="6" height="6" rx="1" /><rect x="2" y="16" width="6" height="6" rx="1" /><rect x="9" y="2" width="6" height="6" rx="1" /><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" /><path d="M12 12V8" /></svg><div><div class="t">SSH over Tailscale only</div><p>Key login for one user named after your account on this computer. Root and passwords can't log in.</p></div>
+      <div class="proof"><small>the server&#x27;s SSH settings</small><pre><span class="ln"><span class="tk">PermitRootLogin</span> <span class="tk"><span class="ok">no</span></span></span><span class="ln"><span class="tk">PasswordAuthentication</span> <span class="tk"><span class="ok">no</span></span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg><div><div class="t">Security updates daily</div><p>Installed every day, with a reboot at 04:00 UTC when one needs it.</p></div>
+      <div class="proof"><small>/etc/apt/apt.conf.d/52closedvps</small><pre><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot</span> <span class="tk"><span class="ok">"true"</span>;</span></span><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot-Time</span> <span class="tk"><span class="ok">"04:00"</span>;</span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z" /><path d="M10 21.9V14L2.1 9.1" /><path d="m10 14 11.9-6.9" /><path d="M14 19.8v-8.1" /><path d="M18 17.5V9.4" /></svg><div><div class="t">Docker stays private</div><p>If you install Docker later, published ports bind to 127.0.0.1. Publish on the Tailscale IP to reach one from your laptop.</p></div>
+      <div class="proof"><small>/etc/docker/daemon.json</small><pre><span class="ln"><span class="tk">{</span> <span class="tk">"ip":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span> <span class="tk">}</span></span></pre></div></div>
+    <h3>Optional</h3>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></svg><div><div class="t">Several at once, under a cap</div><p>Buys ten as stock appears. A cap per server type and one for all your servers together keep the bill where you set it.</p></div>
+      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--count</span> <span class="tk">10</span> <span class="tk">--type</span> <span class="tk">cx23:6,cx33:12</span> <span class="tk">--max-total</span> <span class="tk">90</span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="20" height="5" x="2" y="3" rx="1" /><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /><path d="M10 12h4" /></svg><div><div class="t">Backups</div><p>Hetzner keeps 7 daily copies for 20% of the server price, when you turn them on.</p></div>
+      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--backups</span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg><div><div class="t">Cloudflare Tunnel</div><p>Runs your tunnel for sites you want public. The tunnel connects outward, so the firewall still lets nothing in.</p></div>
+      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">CLOUDFLARE_TUNNEL_TOKEN=…</span> <span class="tk">closedvps</span> <span class="tk">create</span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg><div><div class="t">Claude Code</div><p>Installed for your user. You log in to your own account.</p></div>
+      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--claude</span></span></pre></div></div>
+  </div>
+</section>
+
+<section class="block" id="start">
+  <h2>Before you start</h2>
+  <ul class="needs">
+    <li><div class="ic"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /><circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></svg></div><b>A Hetzner API token</b><span>Read &amp; Write. Asked on the first run, and kept in your system's password store if you say so.</span></li>
+    <li><div class="ic"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="16" y="16" width="6" height="6" rx="1" /><rect x="2" y="16" width="6" height="6" rx="1" /><rect x="9" y="2" width="6" height="6" rx="1" /><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" /><path d="M12 12V8" /></svg></div><b>A Tailscale auth key</b><span>Asked on every run and never saved.</span></li>
+    <li><div class="ic"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><polyline points="4 17 10 11 4 5" /><line x1="12" x2="20" y1="19" y2="19" /></svg></div><b>An SSH key</b><span>The one on this computer, found on its own.</span></li>
+  </ul>
+  <p class="after">The first run also asks where and what to buy, your price caps, backups and where alerts go, and remembers it. <code>closedvps create --dry-run</code> prints the whole first-boot setup before you pay for anything.</p>
+</section>
+
+<section class="block two" id="locked-out">
+  <div>
+    <h2>If Tailscale stops working</h2>
+    <p class="sub">Open port 22 to your current IPv4 address, SSH to the public IP, fix Tailscale, then shut it again. To get rid of a server, delete it and its firewall in the Hetzner Console and remove it from your Tailscale admin.</p>
+  </div>
+  <pre class="term"><span class="dim">$</span> closedvps open-ssh vps
+<span class="dim">$</span> ssh dev@203.0.113.1
+<span class="dim">$</span> closedvps close-ssh vps</pre>
+</section>
+
+<a class="cta" href="/guide"><div class="s">Rather do it yourself?</div><div class="t">How to lock down a Hetzner VPS by hand</div><span class="go">Read the guide →</span></a>
 </main>
-<footer class="border-t py-6 mt-8 text-sm text-muted-foreground flex flex-wrap gap-x-6 gap-y-2">
-  <span>MIT licensed</span>
-  <a class="hover:text-foreground" href="https://github.com/tulayha/closedvps">Source</a>
-  <a class="hover:text-foreground" href="https://github.com/tulayha/closedvps#security-model">Security model</a>
-  <a class="hover:text-foreground" href="/llms.txt">llms.txt</a>
-</footer>
+
+<footer><span>MIT licensed</span><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
 </div>
 <script>
 document.addEventListener("click", async (e) => {
   const b = e.target.closest("[data-copy]");
   if (!b) return;
   try { await navigator.clipboard.writeText(b.dataset.copy); } catch { return; }
-  b.setAttribute("aria-label", "Copied"); b.style.color = "var(--ok)";
-  setTimeout(() => { b.setAttribute("aria-label", "Copy install command"); b.style.color = ""; }, 1500);
+  b.classList.add("copied"); setTimeout(() => b.classList.remove("copied"), 1400);
 });
-</script>
-<script>
+document.querySelectorAll("[data-os]").forEach((b) => b.addEventListener("click", () => {
+  const box = b.closest(".install");
+  box.querySelectorAll("[data-os]").forEach((x) => x.setAttribute("aria-selected", x === b));
+  box.querySelectorAll("[data-cmd]").forEach((x) => (x.hidden = x.dataset.cmd !== b.dataset.os));
+}));
+
+// The run, typed out one step at a time. Without JavaScript #story shows the whole run as plain text.
 (() => {
-  const story = [["cmd","closedvps create"],["out","Buys the first of these Hetzner has in stock (per month with IPv4 and backups, before VAT):"],["out","  <span class=\"b\">cx23</span>   nbg1   2 cores    4 GB x86  <span class=\"hl\">7.09 EUR/month</span>"],["out","  <span class=\"b\">cax11</span>  hel1   2 cores    4 GB arm  <span class=\"hl\">7.69 EUR/month</span>"],["out","Buy it? [y/N] <span class=\"b\">y</span>"],["out","Firewall closedvps-vps ready, <span class=\"ok\">no inbound rules</span>"],["out","<span class=\"dim\">09:14:02</span>  <span class=\"warn\">nothing on your list is in stock</span> <span class=\"dim\">(check 1)</span>"],["out","<span class=\"dim\">Trying again every minute until one is bought. Ctrl+C stops.</span>"],["wait","<span class=\"dim\">... 2 hours later ...</span>"],["out","<span class=\"dim\">11:43:02</span>  <span class=\"ok\">cax11 hel1   vps bought</span>, <span class=\"hl\">7.69 EUR/month</span>"],["out","vps is running at 203.0.113.1, <span class=\"ok\">unreachable from the internet</span>."],["out","Backups are on."],["out","First-boot setup takes 3 to 5 minutes."],["dots","Waiting for vps to join your tailnet"],["ok","<span class=\"b ok\">Ready: ssh dev@vps</span>"],["out","<span class=\"warn\">In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.</span>"],["cmd","nmap -Pn 203.0.113.1"],["out","All 1000 scanned ports on 203.0.113.1 are in ignored states."],["out","Not shown: <span class=\"ok\">1000 filtered tcp ports</span> (no-response)"],["cmd","ssh dev@vps"],["prompt","<span class=\"ok\">dev@vps</span>:<span class=\"hl\">~</span>$ "]];
-  const el = document.getElementById("story");
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const line = (h) => { const s = document.createElement("span"); s.className = "ln"; s.innerHTML = h; el.append(s); return s; };
-  async function play() {
-    el.textContent = "";
-    for (const [kind, text] of story) {
-      if (kind === "cmd") {
-        const s = line('<span class="dim">$</span> <span class="b"></span>');
-        for (const ch of text) { s.lastChild.append(ch); await sleep(45); }
-        await sleep(350);
-      } else if (kind === "wait") {
-        line(text); await sleep(1400);
-      } else if (kind === "dots") {
-        const s = line(text);
-        for (let i = 0; i < 12; i++) { s.append("."); await sleep(120); }
-        s.insertAdjacentHTML("beforeend", ' <span class="ok">online</span>'); await sleep(400);
-      } else if (kind === "ok") {
-        line(text); await sleep(900);
-      } else if (kind === "prompt") {
-        line(text + '<span class="cursor"></span>');
-      } else {
-        line(text); await sleep(500);
+  const story = [["cmd","closedvps create"],["out","Buys the first of these Hetzner has in stock (per month with IPv4, before VAT):"],["out","  <span class=\"b\">cx23</span>   nbg1   2 cores    4 GB x86  <span class=\"hl\">5.99 EUR/month</span>"],["out","  <span class=\"b\">cax11</span>  hel1   2 cores    4 GB arm  <span class=\"hl\">6.49 EUR/month</span>"],["out","Buy it? [y/N] <span class=\"b\">y</span>"],["out","Firewall closedvps-vps ready, <span class=\"ok\">no inbound rules</span>"],["out","<span class=\"dim\">09:14:02</span>  <span class=\"warn\">nothing on your list is in stock</span> <span class=\"dim\">(check 1)</span>"],["out","<span class=\"dim\">Trying again every minute until one is bought. Ctrl+C stops.</span>"],["wait","<span class=\"dim\">... 2 hours later ...</span>"],["out","<span class=\"dim\">11:43:02</span>  <span class=\"ok\">cax11 hel1   vps bought</span>, <span class=\"hl\">6.49 EUR/month</span>"],["out","vps is running at 203.0.113.1, <span class=\"ok\">unreachable from the internet</span>."],["out","First-boot setup takes 3 to 5 minutes."],["dots","Waiting for vps to join your tailnet"],["ok","<span class=\"b ok\">Ready: ssh dev@vps</span>"],["out","<span class=\"warn\">In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.</span>"],["cmd","nmap -Pn 203.0.113.1"],["out","All 1000 scanned ports on 203.0.113.1 are in ignored states."],["out","Not shown: <span class=\"ok\">1000 filtered tcp ports</span> (no-response)"],["cmd","ssh dev@vps"],["prompt","<span class=\"ok\">dev@vps</span>:<span class=\"hl\">~</span>$ "]];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pane = document.getElementById("pane");
+  const full = document.getElementById("story");
+  // steps: waiting, bought, set up, checked from outside
+  const cut = [story.findIndex(([k]) => k === "wait"), story.findIndex(([, x]) => x.startsWith("First-boot")), story.findIndex(([k], i) => i > 0 && k === "cmd")];
+  const steps = [story.slice(0, cut[0]), story.slice(cut[0], cut[1]), story.slice(cut[1], cut[2]), story.slice(cut[2])];
+  const html = ([k, x]) => k === "cmd" ? `<span class="dim">$</span> <span class="b">${x}</span>` : k === "dots" ? `${x}............ <span class="ok">online</span>` : k === "prompt" ? `${x}<span class="cursor"></span>` : x;
+  const draw = (pre, st) => { pre.innerHTML = st.map((s) => `<span class="ln">${html(s)}</span>`).join(""); };
+  full.classList.add("sr");
+  // every step drawn once, stacked and hidden, so the box keeps the tallest one's height
+  for (const st of steps) { const p = document.createElement("pre"); p.className = "hide"; p.setAttribute("aria-hidden", "true"); draw(p, st); pane.append(p); }
+  const live = document.createElement("pre"); live.setAttribute("aria-hidden", "true"); pane.append(live);
+
+  let run = 0;
+  const sleep = (ms, id) => new Promise((ok, stop) => setTimeout(() => (id === run ? ok() : stop()), ms));
+  const add = (h) => { const s = document.createElement("span"); s.className = "ln"; s.innerHTML = h; live.append(s); return s; };
+  const pause = { cmd: 300, wait: 1100, ok: 700, prompt: 0, out: 380 };
+  const length = (st) => st.reduce((ms, [k, x]) => ms + (k === "cmd" ? x.length * 38 : k === "dots" ? 1430 : 0) + (pause[k] ?? 0), 0);
+  async function play(st) {
+    const id = ++run;
+    live.textContent = "";
+    try {
+      for (const [k, x] of st) {
+        if (k === "cmd") {
+          const s = add('<span class="dim">$</span> <span class="b"></span>');
+          for (const ch of x) { s.lastChild.append(ch); await sleep(38, id); }
+        } else if (k === "dots") {
+          const s = add(x);
+          for (let i = 0; i < 12; i++) { s.append("."); await sleep(90, id); }
+          s.insertAdjacentHTML("beforeend", ' <span class="ok">online</span>');
+          await sleep(350, id);
+          continue;
+        } else add(html([k, x]));
+        await sleep(pause[k] ?? 380, id);
       }
-    }
-    await sleep(6000);
-    play();
+      return true;
+    } catch { return false; }
   }
-  play();
+
+  const tabs = [...document.querySelectorAll("[data-step]")];
+  let cur = 0, auto = !reduced;
+  function select(i) {
+    cur = i;
+    tabs.forEach((b, j) => { b.setAttribute("aria-selected", i === j); b.classList.remove("playing"); });
+    document.getElementById("stepname").textContent = `${i + 1} of 4`;
+    document.getElementById("prev").disabled = i === 0;
+    document.getElementById("next").disabled = i === 3;
+    if (!reduced) { tabs[i].style.setProperty("--dur", length(steps[i]) + "ms"); void tabs[i].offsetWidth; tabs[i].classList.add("playing"); }
+  }
+  async function go(i) {
+    select(i);
+    if (reduced) { run++; draw(live, steps[i]); return; }
+    const done = await play(steps[i]);
+    if (done && auto && i < 3) { await new Promise((r) => setTimeout(r, 1600)); if (auto) go(i + 1); }
+  }
+  const pick = (i) => { auto = false; go(i); };
+  tabs.forEach((b, i) => b.addEventListener("click", () => pick(i)));
+  document.getElementById("prev").addEventListener("click", () => pick(Math.max(0, cur - 1)));
+  document.getElementById("next").addEventListener("click", () => pick(Math.min(3, cur + 1)));
+  if (reduced) go(0);
+  else new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { o.disconnect(); go(0); } }, { threshold: 0.35 }).observe(pane);
 })();
 </script>
 </body>
