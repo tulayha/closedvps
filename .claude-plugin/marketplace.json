@@ -1,12 +1,14 @@
 {
   "name": "closedvps",
-  "description": "The closedvps skill for Claude Code",
+  "description": "Buy Hetzner Cloud servers with every inbound port closed, reachable only over Tailscale, for Claude Code, Codex or anything else.",
   "owner": { "name": "Talha Amjad", "url": "https://github.com/tulayha" },
   "plugins": [
     {
       "name": "closedvps",
       "source": "./",
-      "description": "Buy Hetzner Cloud servers with every inbound port closed, waiting and retrying while Hetzner is sold out."
+      "description": "Buy Hetzner Cloud servers with every inbound port closed, waiting and retrying while Hetzner is sold out.",
+      "category": "devops",
+      "keywords": ["hetzner", "vps", "tailscale", "firewall", "claude-code", "codex", "remote-dev"]
     }
   ]
 }

@@ -256,7 +256,11 @@ as a plugin:
 ```
 
 It adds `/closedvps:create` and `/closedvps:delete`, and asks you to approve every real buy or delete the agent
-runs. Other agents can load the skill directly.
+runs. Other agents (Codex, Cursor, Gemini CLI and more) can add the skill with:
+
+```
+npx skills add tulayha/closedvps
+```
 
 ## Development
 
