@@ -73,7 +73,7 @@ func exampleRun(t *testing.T) string {
 		if polls++; polls < 13 {
 			return nil, nil // still installing
 		}
-		return []tsPeer{{HostName: "vps", DNSName: "vps.tail1234.ts.net.", Online: true, TailscaleIPs: []string{"100.64.0.7"}, Created: clock}}, nil
+		return []tsPeer{{HostName: "vps", DNSName: "vps.tail1234.ts.net.", Online: true, TailscaleIPs: []string{"100.64.0.7"}, Created: clock, Tags: []string{"tag:closedvps"}}}, nil
 	}
 	a.sshUp = func(string) bool { return true }
 

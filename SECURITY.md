@@ -55,7 +55,9 @@ creates the server, so there's no moment when the server is open. closedvps refu
 has inbound rules or is attached elsewhere, warns when another firewall on the server lets traffic in, and
 `closedvps list` checks again. SSH listens only for your key and your user, with root login off, and is
 reached over Tailscale; every device on your tailnet can reach it unless your Tailscale access rules say
-otherwise. `open-ssh` adds one rule for one IP until `close-ssh` removes it.
+otherwise. A server that joined untagged can also open connections to your other devices, so the README's
+Tailscale access section tags it and lets only your own devices start connections; `create` warns when a new
+server has no tag. `open-ssh` adds one rule for one IP until `close-ssh` removes it.
 
 **Spending money.** A bug in buying costs real money. Each purchase is checked against `--max-price`, the
 type's own cap and `--max-total` with prices read fresh each time, and backups counted for servers bought in

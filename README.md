@@ -34,7 +34,8 @@ The first run asks for a few things and remembers them:
 
 Every run then asks for a Tailscale auth key (login.tailscale.com/admin/settings/keys). Make it one-off and
 pre-approved, since it's spent once the server joins, or reusable with an expiry of a day when you buy several
-at once. ClosedVPS
+at once, and give it the tag `tag:closedvps` once your tailnet policy has the two changes in
+[Tailscale access](#tailscale-access). ClosedVPS
 shows what it would buy and asks before spending anything. A few minutes after the purchase it prints
 `Ready: ssh you@vps`.
 
@@ -174,9 +175,9 @@ These stay as they are, and you should know them:
   Hetzner keeps that for the server's life in its metadata service, which only root on the server can reach.
   A one-off auth key is spent once the server joins; a reusable one for `--count` should expire within a day.
   cloudflared needs the tunnel token on the server anyway.
-- Every device on your tailnet can reach the server's SSH port. Use Tailscale's access rules if some of them
-  are shared. Turn off key expiry for the server in the Tailscale admin, or it drops off your tailnet after
-  180 days.
+- A server that joins with an untagged key can open connections to every device on your tailnet and drops
+  off it after 180 days. [Tailscale access](#tailscale-access) fixes both, and ClosedVPS warns when a new
+  server has no tag.
 - Outbound traffic is allowed, and your user has passwordless sudo, as on most cloud images.
 - Alert links can post to your chat, so they're kept like the token. Each server sends its own "ready" alert
   with them and then deletes its copy, though root can still read them from the metadata service. Alerts
@@ -184,6 +185,25 @@ These stay as they are, and you should know them:
   read it, so ClosedVPS makes a random one.
 
 Report vulnerabilities as described in [SECURITY.md](SECURITY.md).
+
+## Tailscale access
+
+A new tailnet lets every device reach every other one, so a server that Claude Code or a bad package takes
+over could reach your laptop. Two changes in the tailnet policy (login.tailscale.com/admin/acls) keep your
+devices able to reach the servers and stop the servers from opening connections to anything:
+
+```jsonc
+"tagOwners": { "tag:closedvps": ["autogroup:admin"] },
+"acls": [
+  // was "src": ["*"]; tagged servers aren't members, so they can only answer
+  { "action": "accept", "src": ["autogroup:member"], "dst": ["*:*"] },
+],
+```
+
+Then generate auth keys with the tag `tag:closedvps`. Replies to your connections still get through, and
+tagged devices skip key expiry. If your policy uses `grants`, change the `src` of the allow-everything grant
+the same way. A server that's already running gets the tag from the Machines page, its menu, Edit tags.
+[closedvps.com/tailscale](https://closedvps.com/tailscale) explains each step.
 
 ## If Tailscale stops working
 

@@ -49,7 +49,8 @@ Price limits: each server costs at most --max-price a month, or its own cap when
 Secrets and settings from the environment:
   HCLOUD_TOKEN              Hetzner API token, Read & Write. Without it, the saved token, or it asks
                             and offers to save it in your system's password store.
-  TS_AUTHKEY                Tailscale auth key, asked for when not set. Never saved. Reusable with --count.
+  TS_AUTHKEY                Tailscale auth key, tagged tag:closedvps (closedvps.com/tailscale). Asked for
+                            when not set. Never saved. Reusable with --count.
   CLOUDFLARE_TUNNEL_TOKEN   optional: token of a Cloudflare Tunnel, for public web traffic
   CLOSEDVPS_NOTIFY          alert links, when --notify isn't given (else the ones saved by setup)
   CLOSEDVPS_SSH_KEY         the SSH public key itself, for machines without a key file (Docker)
@@ -273,7 +274,7 @@ func (r *createRun) render() error {
 	} else {
 		var err error
 		if base.TailscaleKey, err = r.secret("TS_AUTHKEY", "Tailscale auth key:",
-			"login.tailscale.com/admin/settings/keys > Generate auth key. "+keyAdvice(r.o.count)); err != nil {
+			"login.tailscale.com/admin/settings/keys > Generate auth key, with the tag tag:closedvps (closedvps.com/tailscale shows the policy it needs). "+keyAdvice(r.o.count)); err != nil {
 			return err
 		}
 		base.TunnelToken = strings.TrimSpace(os.Getenv("CLOUDFLARE_TUNNEL_TOKEN"))

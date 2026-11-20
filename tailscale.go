@@ -18,6 +18,7 @@ type tsPeer struct {
 	Online       bool
 	TailscaleIPs []string
 	Created      time.Time
+	Tags         []string
 }
 
 // tailscaleBinary finds the local Tailscale CLI, which the macOS and Windows apps don't put on PATH.
@@ -86,7 +87,11 @@ func (a *app) waitForTailnet(ctx context.Context, bin, name, user string, create
 						host = p.TailscaleIPs[0]
 					}
 					fmt.Fprintf(a.log, " online\nReady: ssh %s@%s\n", user, host)
-					fmt.Fprintf(a.log, "In the Tailscale admin, turn off key expiry for %s, or it drops off your tailnet after 180 days.\n", host)
+					// Tailscale lets every device reach every other one unless the policy says otherwise, and only
+					// tagged devices skip key expiry.
+					if len(p.Tags) == 0 {
+						fmt.Fprintf(a.log, "%s has no Tailscale tag, so it can open connections to your other devices and drops off your tailnet after 180 days. closedvps.com/tailscale shows how to tag it.\n", host)
+					}
 					return host, nil
 				}
 			}

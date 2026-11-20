@@ -14,4 +14,3 @@ vps is running at 203.0.113.1, unreachable from the internet.
 First-boot setup takes 3 to 5 minutes.
 Waiting for vps to join your tailnet............ online
 Ready: ssh dev@vps
-In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.
