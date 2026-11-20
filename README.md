@@ -32,10 +32,10 @@ The first run asks for a few things and remembers them:
   Backups (off unless you say yes);
 - your user name on the server, and where alerts go besides this computer.
 
-Every run then asks for a Tailscale auth key (login.tailscale.com/admin/settings/keys). Make it one-off and
-pre-approved, since it's spent once the server joins, or reusable with an expiry of a day when you buy several
-at once, and give it the tag `tag:closedvps` once your tailnet policy has the two changes in
-[Tailscale access](#tailscale-access). ClosedVPS
+Every run then asks for a Tailscale auth key (login.tailscale.com/admin/settings/keys). Make it one-off,
+since it's spent once the server joins, or reusable with an expiry of a day when you buy several at once, and
+pre-approved if your tailnet asks you to approve new devices. Give it the tag `tag:closedvps` once your
+tailnet policy has the two changes in [Tailscale access](#tailscale-access). ClosedVPS
 shows what it would buy and asks before spending anything. A few minutes after the purchase it prints
 `Ready: ssh you@vps`.
 

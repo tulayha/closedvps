@@ -58,11 +58,12 @@ type Wants struct {
 	Locations []string           // in the order to try them
 	MaxPrice  float64            // per server; 0 is no limit (only `types` uses that)
 	Backups   bool
+	MinMemory float64 // GB; smaller types are left out
 }
 
 // Candidates lists what may be bought, in the order it's tried: the wanted types in their order, or with
 // none given every shared-vCPU type cheapest first; then locations in their order. Anything over its cap,
-// with an unknown price, or being retired in a location is left out.
+// under MinMemory, with an unknown price, or being retired in a location is left out.
 func (w Wants) Candidates(types []*hcloud.ServerType, ipv4 map[string]float64) []Candidate {
 	var out []Candidate
 	for _, t := range types {
@@ -70,6 +71,9 @@ func (w Wants) Candidates(types []*hcloud.ServerType, ipv4 map[string]float64) [
 			continue
 		}
 		if len(w.Types) == 0 && t.CPUType != hcloud.CPUTypeShared {
+			continue
+		}
+		if float64(t.Memory) < w.MinMemory {
 			continue
 		}
 		limit := w.MaxPrice

@@ -93,8 +93,8 @@ func newCreateCmd(a *app) *cobra.Command {
 	f.BoolVar(&o.json, "json", false, "print one JSON event per line on stdout, for scripts and agents; the text goes to stderr")
 	f.StringVar(&o.image, "image", "ubuntu-24.04", "Hetzner image")
 	f.DurationVar(&o.interval, "every", time.Minute, "how long to wait between tries when nothing can be bought")
-	f.BoolVar(&o.claude, "claude", false, "also install Claude Code (you log in on the server afterwards)")
-	f.BoolVar(&o.codex, "codex", false, "also install OpenAI's Codex CLI (you log in on the server afterwards)")
+	f.BoolVar(&o.claude, "claude", false, "also install Claude Code (you log in on the server afterwards); only types with 4 GB or more")
+	f.BoolVar(&o.codex, "codex", false, "also install OpenAI's Codex CLI (you log in on the server afterwards); only types with 4 GB or more")
 	f.BoolVar(&o.dryRun, "dry-run", false, "show what would be bought and print the first-boot setup, without buying")
 	f.BoolVar(&o.yes, "yes", false, "don't ask before buying")
 	f.BoolVar(&o.noWait, "no-wait", false, "return once the servers are bought, without waiting for them to join your tailnet")
@@ -240,6 +240,9 @@ func (r *createRun) options(ctx context.Context, p prefs, saved bool) error {
 		return fmt.Errorf("--type: %w", err)
 	}
 	r.wants = buy.Wants{Types: want, Caps: caps, Locations: splitList(o.locations), MaxPrice: o.maxPrice, Backups: o.backups}
+	if o.claude || o.codex {
+		r.wants.MinMemory = agentMemory
+	}
 
 	linkText := o.notify
 	if o.changed("notify") {
@@ -262,6 +265,20 @@ func (r *createRun) options(ctx context.Context, p prefs, saved bool) error {
 	}
 	r.key, err = findPublicKey(o.sshKey, o.changed("ssh-key"))
 	return err
+}
+
+// agentMemory is the least Claude Code and Codex ask for, in GB (code.claude.com/docs/en/setup and
+// github.com/openai/codex/blob/main/docs/install.md).
+const agentMemory = 4
+
+func (r *createRun) agents() string {
+	switch {
+	case r.o.claude && r.o.codex:
+		return "Claude Code and Codex"
+	case r.o.codex:
+		return "Codex"
+	}
+	return "Claude Code"
 }
 
 // render makes each server's first-boot setup. Validation happens here, before anything is bought.
@@ -296,9 +313,9 @@ func (r *createRun) render() error {
 
 func keyAdvice(count int) string {
 	if count > 1 {
-		return "Reusable and pre-approved, since several servers use it; let it expire within a day."
+		return "Reusable, since several servers use it, and let it expire within a day. Turn on Pre-approved too if your tailnet asks you to approve new devices."
 	}
-	return "One-off and pre-approved is best."
+	return "One-off is best, plus Pre-approved if your tailnet asks you to approve new devices."
 }
 
 // readyAlerts are the requests a server sends once it has joined the tailnet.
@@ -333,6 +350,9 @@ func (r *createRun) plan(ctx context.Context) error {
 			return err
 		}
 		if r.cands = r.wants.Candidates(types, prices.IPv4); len(r.cands) == 0 {
+			if r.wants.MinMemory > 0 {
+				return fmt.Errorf("nothing on your list has %d GB of memory or more for %s and costs %s or less; see `closedvps types`", agentMemory, r.agents(), buy.Money(r.o.maxPrice, r.currency))
+			}
 			return fmt.Errorf("nothing on your list costs %s or less; see `closedvps types` and raise --max-price", buy.Money(r.o.maxPrice, r.currency))
 		}
 		for _, n := range r.names {

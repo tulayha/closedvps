@@ -18,7 +18,7 @@ release" note, since it only shows in a terminal and never with `--json` or `--y
 
 Ask the user to export these in the shell you use (don't put them in files or the chat):
 `HCLOUD_TOKEN` (Hetzner, Read & Write; not needed if they saved one with `closedvps setup`), `TS_AUTHKEY`
-(Tailscale, pre-approved, tagged `tag:closedvps` as the README's Tailscale access section sets up; one-off for
+(Tailscale, tagged `tag:closedvps`, pre-approved when the tailnet approves devices, as the README's Tailscale access section sets up; one-off for
 one server, reusable with a one-day expiry for `--count`), and optionally
 `CLOUDFLARE_TUNNEL_TOKEN` and `CLOSEDVPS_NOTIFY` (alert links, if none are saved).
 

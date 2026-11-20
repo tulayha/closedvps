@@ -59,6 +59,15 @@ func TestCandidatesGivenOrderAndCap(t *testing.T) {
 	}
 }
 
+func TestCandidatesMinMemory(t *testing.T) {
+	small := st("cpx02", hcloud.CPUTypeShared, "x86", map[string]string{"nbg1": "3.00"}, map[string]bool{"nbg1": true})
+	small.Memory = 1
+	w := Wants{Locations: []string{"nbg1"}, MaxPrice: 10, MinMemory: 4}
+	if got := names(w.Candidates(append([]*hcloud.ServerType{small}, testTypes...), ipv4)); got != "cx23 nbg1, cx33 nbg1" {
+		t.Fatalf("a 1 GB type is too small for Claude Code or Codex: got %s", got)
+	}
+}
+
 func TestCandidatesTypeCaps(t *testing.T) {
 	w := Wants{Types: []string{"cx33", "cx23"}, Caps: map[string]float64{"cx33": 6}, Locations: []string{"nbg1"}, MaxPrice: 10}
 	if got := names(w.Candidates(testTypes, ipv4)); got != "cx23 nbg1" {
