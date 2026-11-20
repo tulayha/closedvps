@@ -11,7 +11,7 @@
   --raised: #ecebe4; --chip: #efeee8; --chip2: #eae8e0; --red-line: #ecc5bf; --green-line: #bcdcc8;
   --solid: #1a1a18; --on-solid: #f1f0ea; --on-solid-dim: #a3a29a; --stage-line: #000; --shadow: rgb(30 25 10 / 0.45);
   --moon: block; --sun: none;
-  --sans: "Geist", system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, Menlo, monospace; --serif: "Newsreader", Georgia, serif;
+  --sans: var(--font-geist); --mono: var(--font-geist-mono); --serif: var(--font-newsreader);
 }
 :root { color-scheme: light; }
 * { box-sizing: border-box; }
@@ -198,6 +198,7 @@ footer a:hover { color: var(--ink); }
 .doc h2 { margin-top: 56px; font-size: clamp(1.5rem, 3vw, 1.9rem); max-width: none; }
 .doc p { margin: 16px 0 0; font-size: 16.5px; line-height: 1.65; color: var(--muted); }
 .doc p a { color: var(--ink); text-underline-offset: 3px; }
+.doc p.updated { margin-top: 12px; font: 12px/1.5 var(--mono); color: var(--soft); }
 .doc .term { margin-top: 20px; }
 
 @media (min-width: 760px) {

@@ -9,12 +9,12 @@
 
   <h2 id="1-make-the-firewall-first">1. Make the firewall first</h2>
   <p>In the Hetzner Console open Firewalls, Create Firewall, delete the SSH and ICMP rules it suggests, and save.
-    A Hetzner firewall with no inbound rules drops every incoming packet. Outbound stays open.</p>
+    A Hetzner firewall with no inbound rules drops every incoming packet. Outbound stays open (<a href="https://docs.hetzner.com/cloud/firewalls/faq/">Hetzner's firewall FAQ</a>).</p>
 
   <h2 id="2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</h2>
-  <p>Make a one-off auth key at login.tailscale.com/admin/settings/keys. Create the server with your SSH key,
+  <p>Make a one-off <a href="https://tailscale.com/kb/1085/auth-keys">auth key</a> at <a href="https://login.tailscale.com/admin/settings/keys">login.tailscale.com/admin/settings/keys</a>. Create the server with your SSH key,
     the new firewall selected, and this under Cloud config. Once it shows up in the Tailscale admin, turn off
-    key expiry for it, or it drops off your tailnet after 180 days.</p>
+    <a href="https://tailscale.com/kb/1028/key-expiry#disabling-key-expiry">key expiry</a> for it, or it drops off your tailnet after 180 days.</p>
   <pre class="term"><code>#cloud-config
 runcmd:
   - curl -fsSL https://tailscale.com/install.sh -o /tmp/ts.sh
@@ -30,14 +30,14 @@ END
 systemctl restart ssh</code></pre>
 
   <h2 id="4-let-security-updates-reboot-it">4. Let security updates reboot it</h2>
-  <p>Ubuntu already installs security updates every day. A kernel update only takes effect after a reboot, so let it reboot at 04:00 UTC when one is needed:</p>
+  <p>Ubuntu already <a href="https://ubuntu.com/server/docs/how-to/software/automatic-updates/">installs security updates every day</a>. A kernel update only takes effect after a reboot, so let it reboot at 04:00 UTC when one is needed:</p>
   <pre class="term"><code>cat &gt; /etc/apt/apt.conf.d/52reboot &lt;&lt;'END'
 Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "04:00";
 END</code></pre>
 
   <h2 id="5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</h2>
-  <p>In the Cloudflare dashboard go to Networking, Tunnels, Create a tunnel, and run the install command it shows
+  <p>In the Cloudflare dashboard go to Networking, Tunnels, Create a <a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/">tunnel</a>, and run the install command it shows
     on the server. Then on the tunnel's Routes tab add a published application with the service URL
     <code>http://127.0.0.1:3000</code> (your app's port). The tunnel connects outward, so the firewall stays shut.</p>
 </main>

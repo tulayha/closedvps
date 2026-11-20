@@ -1,4 +1,5 @@
 ---
+import { Font } from "astro:assets";
 import { site, org, page, markdown } from "../site.js";
 
 const footer = "<footer><a href=\"/claude-code\">Claude Code on a VPS</a><a href=\"/sold-out\">When Hetzner is sold out</a><a href=\"https://github.com/tulayha/closedvps/blob/main/LICENSE\">MIT licensed</a><a href=\"https://github.com/tulayha/closedvps\">Source</a><a href=\"https://github.com/tulayha/closedvps#security-model\">Security model</a><a href=\"/llms.txt\">llms.txt</a></footer>";
@@ -50,9 +51,9 @@ if (article) {
     <link rel="alternate" type="text/markdown" href={markdown(path)}>
   </Fragment>
 )}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
+<Font cssVariable="--font-geist" preload={[{ weight: "400", style: "normal" }]} />
+<Font cssVariable="--font-geist-mono" />
+<Font cssVariable="--font-newsreader" preload={[{ weight: "500", style: "normal" }]} />
 <link rel="stylesheet" href="/site.css">
 <script is:inline>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
 document.documentElement.classList.add("js");</script>

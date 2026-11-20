@@ -1,13 +1,13 @@
 <div class="docgrid">
 <main class="doc">
   <h1>When Hetzner says CX23 isn't available</h1>
-  <p>Since June 2026 Hetzner has often marked its cost-optimized servers, the x86 CX and the ARM CAX types, as unavailable. Its status page blames high demand and limited hardware, and on top of that it turns down new servers for new accounts and for some older ones chosen at random (<a href="https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/">a write-up of what changed</a>). The servers come back into stock now and then during the day, and whoever asks first gets them.</p>
+  <p>Since June 2026 Hetzner has often marked its cost-optimized servers, the x86 CX and the ARM CAX types, as unavailable. Its <a href="https://status.hetzner.com/">status page</a> blames high demand and limited hardware, and on top of that it turns down new servers for new accounts and for some older ones chosen at random (<a href="https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/">a write-up of what changed</a>). The servers come back into stock now and then during the day, and whoever asks first gets them.</p>
 
   <h2 id="what-the-in-stock-plans-cost">What the in-stock plans cost</h2>
-  <p>In September 2026 a 4 GB CX23 was 5.99 EUR a month in Germany and Finland, with IPv4 and before VAT, while the nearest plan that stayed in stock, the CPX22, was 19.99 EUR. At 8 GB the CX33 was 8.99 EUR against 35.99 EUR for the CPX32, and at 16 GB the CX43 was 16.49 EUR against 69.99 EUR. A server you already rent keeps its old price, so check before you delete or resize one.</p>
+  <p>In September 2026 a 4 GB CX23 was 5.99 EUR a month in Germany and Finland, with IPv4 and before VAT, while the nearest plan that stayed in stock, the CPX22, was 19.99 EUR. At 8 GB the CX33 was 8.99 EUR against 35.99 EUR for the CPX32, and at 16 GB the CX43 was 16.49 EUR against 69.99 EUR. A server you already rent keeps its old price, so check before you delete or resize one. <a href="https://www.hetzner.com/cloud/">Hetzner's price list</a> has today's prices.</p>
 
   <h2 id="widen-what-you-ll-take">Widen what you'll take</h2>
-  <p>Stock is per type and per location, so a list of a few types across a few locations comes up sooner than one CX23 in one place. The ARM CAX11 is another 4 GB server, at 6.49 EUR, and Hetzner's European locations are Nuremberg (nbg1), Falkenstein (fsn1) and Helsinki (hel1).</p>
+  <p>Stock is per type and per location, so a list of a few types across a few locations comes up sooner than one CX23 in one place. The ARM CAX11 is another 4 GB server, at 6.49 EUR, and Hetzner's <a href="https://docs.hetzner.com/cloud/general/locations/">European locations</a> are Nuremberg (nbg1), Falkenstein (fsn1) and Helsinki (hel1).</p>
 
   <h2 id="buy-it-the-minute-it-s-back">Buy it the minute it's back</h2>
   <pre class="term"><code>closedvps create --type cx23:6,cax11:7,cx33:9 --location nbg1,fsn1,hel1</code></pre>

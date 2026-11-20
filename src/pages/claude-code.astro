@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { dated } from "../site.js";
 import body from "../body/claude-code.html?raw";
 ---
 <Layout path="/claude-code">
-<Fragment set:html={body} />
+<Fragment set:html={dated("/claude-code", body)} />
 </Layout>

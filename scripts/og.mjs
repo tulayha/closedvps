@@ -15,7 +15,8 @@ const map = pick(/<div class="map"[\s\S]*?\n<\/div>(?=\n<p class="mapnote">)/);
 
 const html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
-<style>${readFileSync(`${here}public/site.css`, "utf8")}
+<style>:root { --font-geist: "Geist", sans-serif; --font-geist-mono: "Geist Mono", monospace; --font-newsreader: "Newsreader", serif; }
+${readFileSync(`${here}public/site.css`, "utf8")}
 body { width: 1200px; height: 630px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 64px 8px; }
 .brand { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: 24px; text-decoration: none; }
 .brand svg.i { width: 26px; height: 26px; }

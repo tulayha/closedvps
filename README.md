@@ -6,7 +6,7 @@ The website for [ClosedVPS](https://github.com/tulayha/closedvps). This branch h
 The site is built with [Astro](https://astro.build) into static files, served as Cloudflare Workers static assets.
 
 - `src/site.js` lists every page once: title, description, dates, and its line in llms.txt. The page tags,
-  schema, sitemap and llms.txt all read it. Bump a page's `modified` date when what it says changes.
+  schema, sitemap and llms.txt all read it. Bump a page's `modified` date when what it says changes; articles show it as their "Updated" line.
 - `src/layouts/Layout.astro` is the head, header and footer every page shares.
 - `src/body/*.html` is each page's content, and `src/pages/*.astro` puts it in the layout.
 - `src/terminal.js` builds the example run on the home page from `testdata/example-run.txt` in the latest

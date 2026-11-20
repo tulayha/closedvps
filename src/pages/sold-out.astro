@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { dated } from "../site.js";
 import body from "../body/sold-out.html?raw";
 ---
 <Layout path="/sold-out">
-<Fragment set:html={body} />
+<Fragment set:html={dated("/sold-out", body)} />
 </Layout>

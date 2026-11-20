@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { dated } from "../site.js";
 import body from "../body/why.html?raw";
 ---
 <Layout path="/why">
-<Fragment set:html={body} />
+<Fragment set:html={dated("/why", body)} />
 </Layout>
