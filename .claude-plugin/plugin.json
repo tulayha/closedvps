@@ -5,5 +5,5 @@
   "homepage": "https://closedvps.com",
   "repository": "https://github.com/tulayha/closedvps",
   "license": "MIT",
-  "keywords": ["hetzner", "vps", "tailscale", "server", "firewall"]
+  "keywords": ["hetzner", "vps", "tailscale", "server", "firewall", "claude-code", "codex", "cloudflare-tunnel", "cloud-init", "remote-dev"]
 }
