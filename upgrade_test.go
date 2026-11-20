@@ -23,8 +23,9 @@ import (
 
 // fakeReleases serves GitHub's latest-release answer for tag, with this platform's archive holding bin.
 type fakeReleases struct {
-	asked atomic.Int32 // latest-release requests
-	sums  string       // checksums.txt; a test can spoil it
+	asked   atomic.Int32 // latest-release requests
+	purpose atomic.Value // the last one's ?for=
+	sums    string       // checksums.txt; a test can spoil it
 }
 
 func newFakeReleases(t *testing.T, tr *testRun, tagName string, bin []byte) *fakeReleases {
@@ -35,8 +36,9 @@ func newFakeReleases(t *testing.T, tr *testRun, tagName string, bin []byte) *fak
 	mux := http.NewServeMux()
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
-	mux.HandleFunc("/latest", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/latest", func(w http.ResponseWriter, r *http.Request) {
 		f.asked.Add(1)
+		f.purpose.Store(r.URL.Query().Get("for"))
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"tag_name": tagName,
 			"html_url": "https://github.com/tulayha/closedvps/releases/tag/" + tagName,
@@ -116,7 +118,7 @@ func installedCopy(t *testing.T, tr *testRun) string {
 func TestUpgradeReplacesTheBinary(t *testing.T) {
 	tr := newTestApp(t, "")
 	asRelease(t, tr, "0.1.0")
-	newFakeReleases(t, tr, "v0.2.0", []byte("new binary"))
+	f := newFakeReleases(t, tr, "v0.2.0", []byte("new binary"))
 	self := installedCopy(t, tr)
 
 	if err := tr.run(context.Background(), "upgrade"); err != nil {
@@ -124,6 +126,9 @@ func TestUpgradeReplacesTheBinary(t *testing.T) {
 	}
 	if b, _ := os.ReadFile(self); string(b) != "new binary" {
 		t.Fatalf("binary is %q", b)
+	}
+	if got := f.purpose.Load(); got != "upgrade" {
+		t.Errorf("asked for=%v, want upgrade", got)
 	}
 	want := "Updated closedvps from v0.1.0 to v0.2.0. What changed: https://github.com/tulayha/closedvps/releases/tag/v0.2.0"
 	if !strings.Contains(tr.stdout.String(), want) {
@@ -195,6 +200,9 @@ func TestUpdateNote(t *testing.T) {
 
 	if got, want := tr.app.checkForUpdate(ctx), "closedvps v0.2.0 is out (you have v0.1.0). Update with: closedvps upgrade"; got != want {
 		t.Fatalf("note %q", got)
+	}
+	if got := f.purpose.Load(); got != "check" {
+		t.Errorf("asked for=%v, want check", got)
 	}
 	if got := tr.app.checkForUpdate(ctx); got != "" || f.asked.Load() != 1 {
 		t.Fatalf("second check within a day: asked %d times, note %q", f.asked.Load(), got)

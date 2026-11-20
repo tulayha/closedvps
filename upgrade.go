@@ -25,7 +25,9 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-const latestReleaseAPI = "https://api.github.com/repos/tulayha/closedvps/releases/latest"
+// The site's Worker answers like GitHub's latest-release API and counts each ask, which is how the project
+// knows how many copies are in use.
+const latestReleaseAPI = "https://closedvps.com/latest"
 
 // How this copy got here decides how it updates. The Dockerfile sets CLOSEDVPS_IN_DOCKER.
 const (
@@ -56,21 +58,22 @@ type release struct {
 	} `json:"assets"`
 }
 
-func (a *app) latestRelease(ctx context.Context) (release, error) {
+// latestRelease asks for the newest release; purpose is "check" or "upgrade".
+func (a *app) latestRelease(ctx context.Context, purpose string) (release, error) {
 	url := a.releases
 	if url == "" {
 		url = latestReleaseAPI
 	}
-	body, err := a.fetch(ctx, url, 1<<20, "application/vnd.github+json")
+	body, err := a.fetch(ctx, url+"?for="+purpose, 1<<20, "application/json")
 	if err != nil {
 		return release{}, err
 	}
 	var r release
 	if err := json.Unmarshal(body, &r); err != nil {
-		return release{}, fmt.Errorf("reading the release from GitHub: %w", err)
+		return release{}, fmt.Errorf("reading the newest release: %w", err)
 	}
 	if !semver.IsValid(r.Tag) {
-		return release{}, fmt.Errorf("GitHub's newest release has no version (%q)", r.Tag)
+		return release{}, fmt.Errorf("the newest release has no version (%q)", r.Tag)
 	}
 	return r, nil
 }
@@ -80,7 +83,7 @@ func (a *app) fetch(ctx context.Context, url string, limit int64, accept string)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "closedvps/"+currentVersion())
+	req.Header.Set("User-Agent", "closedvps/"+currentVersion()+" ("+runtime.GOOS+"/"+runtime.GOARCH+")")
 	if accept != "" {
 		req.Header.Set("Accept", accept)
 	}
@@ -138,9 +141,9 @@ func (a *app) upgrade(ctx context.Context) error {
 	case fromSource:
 		return errors.New("this is a development build, so it can't tell which release is newer; install a release with the command on https://closedvps.com")
 	}
-	r, err := a.latestRelease(ctx)
+	r, err := a.latestRelease(ctx, "upgrade")
 	if err != nil {
-		return fmt.Errorf("asking GitHub for the newest release: %w", err)
+		return fmt.Errorf("asking closedvps.com for the newest release: %w", err)
 	}
 	have := tag(currentVersion())
 	if !newer(r.Tag, have) {
@@ -264,9 +267,9 @@ type updateCheck struct {
 	Latest  string    `json:"latest"`
 }
 
-// startUpdateCheck asks GitHub for the newest release while the command runs, at most once a day, as gh
-// does. a.updateNote then gives the note to print, or "" when there's nothing new or the command ended
-// before GitHub answered (the next command tries again).
+// startUpdateCheck asks closedvps.com for the newest release while the command runs, at most once a day, as
+// gh does. a.updateNote then gives the note to print, or "" when there's nothing new or the command ended
+// before the answer came (the next command tries again).
 func (a *app) startUpdateCheck(ctx context.Context, cmd *cobra.Command) {
 	a.updateNote = func() string { return "" }
 	if !a.wantsUpdateCheck(cmd) {
@@ -309,7 +312,7 @@ func (a *app) checkForUpdate(ctx context.Context) string {
 	if a.now().Sub(last.Checked) < 24*time.Hour {
 		return ""
 	}
-	r, err := a.latestRelease(ctx)
+	r, err := a.latestRelease(ctx, "check")
 	if err != nil {
 		return ""
 	}

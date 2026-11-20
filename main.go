@@ -78,8 +78,9 @@ func newRoot(a *app) *cobra.Command {
 		Use:   "closedvps",
 		Short: "Buy a Hetzner Cloud server with every inbound port closed",
 		Long: "closedvps buys a Hetzner Cloud server with every inbound port closed.\n\n" +
-			"Once a day at most, a command run in a terminal asks GitHub whether a newer release is out and says so\n" +
-			"when it ends. CLOSEDVPS_NO_UPDATE_CHECK=1 turns that off.\n\nDocs: https://closedvps.com",
+			"Once a day at most, a command run in a terminal asks closedvps.com whether a newer release is out and\n" +
+			"says so when it ends. The site counts each ask by version, operating system and country, nothing\n" +
+			"else. CLOSEDVPS_NO_UPDATE_CHECK=1 turns that off.\n\nDocs: https://closedvps.com",
 		Version:       currentVersion(),
 		SilenceUsage:  true,
 		SilenceErrors: true,

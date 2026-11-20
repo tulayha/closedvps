@@ -42,7 +42,7 @@ type app struct {
 
 	watched     bool          // stdout and stderr are terminals, so a person sees the update note
 	installedBy string        // how this copy got here: fromRelease, fromGo, fromDocker or fromSource
-	releases    string        // the latest-release API; empty is GitHub's
+	releases    string        // the latest-release API; empty is closedvps.com's
 	self        string        // the binary upgrade replaces; empty is this one
 	updateNote  func() string // set by startUpdateCheck
 }
