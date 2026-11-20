@@ -5,11 +5,9 @@ import (
 	"bytes"
 	"context"
 	"flag"
-	"html"
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -86,8 +84,9 @@ func exampleRun(t *testing.T) string {
 	return filepath.ToSlash(strings.ReplaceAll(s, home, "~"))
 }
 
-// testdata/example-run.txt is what a person sees in a whole run. The site's terminal is made from it
-// (site/scripts/terminal.mjs), so the site never shows output the code doesn't print.
+// testdata/example-run.txt is what a person sees in a whole run. The site's build makes its terminal from this
+// file in the latest release (scripts/terminal.mjs on the site branch), so the site never shows output the code
+// doesn't print.
 // go test . -run TestExampleRun -update rewrites it.
 func TestExampleRun(t *testing.T) {
 	got := exampleRun(t)
@@ -103,63 +102,6 @@ func TestExampleRun(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got != string(want) {
-		t.Fatalf("the output changed; run go test . -run TestExampleRun -update, then npm run terminal in site/, and review both diffs. Now:\n%s", got)
+		t.Fatalf("the output changed; run go test . -run TestExampleRun -update and review the diff. Now:\n%s", got)
 	}
-}
-
-var dots = regexp.MustCompile(`\.{2,} online$`)
-
-// Every closedvps line the site shows must be one the example run printed. The site stops quoting closedvps
-// at its second command (nmap), and the "later" line marks the wait.
-func TestSiteShowsRealOutput(t *testing.T) {
-	b, err := os.ReadFile("testdata/example-run.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	real := map[string]bool{}
-	for line := range strings.Lines(string(b)) {
-		real[dots.ReplaceAllString(strings.TrimRight(line, "\n"), "... online")] = true
-	}
-	check := func(where string, lines []string) {
-		commands := 0
-		for _, l := range lines {
-			l = dots.ReplaceAllString(l, "... online")
-			switch {
-			case strings.HasPrefix(l, "$ "):
-				commands++
-			case commands != 1 || strings.HasSuffix(l, " later ...") || l == "":
-			case !real[l]:
-				t.Errorf("%s shows a line closedvps doesn't print: %q", where, l)
-			}
-		}
-		if commands < 2 {
-			t.Errorf("%s: no example terminal found", where)
-		}
-	}
-
-	md, err := os.ReadFile("site/public/index.md")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, block, _ := strings.Cut(string(md), "```\n$ closedvps create")
-	block, _, _ = strings.Cut("$ closedvps create"+block, "```")
-	check("index.md", strings.Split(block, "\n"))
-
-	page, err := os.ReadFile("site/public/index.html")
-	if err != nil {
-		t.Fatal(err)
-	}
-	pre := regexp.MustCompile(`(?s)<pre id="story"[^>]*>(.*?)</pre>`).FindSubmatch(page)
-	if pre == nil {
-		t.Fatal("no story terminal in index.html")
-	}
-	var lines []string
-	tags := regexp.MustCompile(`<[^>]+>`)
-	for _, ln := range strings.Split(string(pre[1]), `<span class="ln">`)[1:] {
-		lines = append(lines, html.UnescapeString(tags.ReplaceAllString(ln, "")))
-	}
-	if len(lines) < 15 {
-		t.Fatalf("read only %d lines from the story terminal", len(lines))
-	}
-	check("index.html", lines)
 }

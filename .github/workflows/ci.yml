@@ -44,7 +44,7 @@ jobs:
         with:
           version: v2.15.0
       - name: shellcheck install.sh
-        run: shellcheck site/public/install.sh
+        run: shellcheck install/install.sh
       - name: cloud-init schema
         # The golden files are the whole first-boot setup, kept equal to the code by go test.
         run: |
@@ -147,7 +147,7 @@ jobs:
           CLOSEDVPS_DOWNLOAD_BASE: http://127.0.0.1:8000
           CLOSEDVPS_INSTALL_DIR: ${{ runner.temp }}/bin
         run: |
-          sh site/public/install.sh
+          sh install/install.sh
           "$CLOSEDVPS_INSTALL_DIR/closedvps" version
       - name: install.ps1 in Windows PowerShell 5.1
         if: runner.os == 'Windows'
@@ -155,7 +155,7 @@ jobs:
         env:
           CLOSEDVPS_DOWNLOAD_BASE: http://127.0.0.1:8000
         run: |
-          Get-Content site/public/install.ps1 -Raw | Invoke-Expression
+          Get-Content install/install.ps1 -Raw | Invoke-Expression
           & "$env:LOCALAPPDATA\Programs\closedvps\closedvps.exe" version
       - name: install.ps1 in PowerShell 7
         if: runner.os == 'Windows'
@@ -163,5 +163,5 @@ jobs:
         env:
           CLOSEDVPS_DOWNLOAD_BASE: http://127.0.0.1:8000
         run: |
-          Get-Content site/public/install.ps1 -Raw | Invoke-Expression
+          Get-Content install/install.ps1 -Raw | Invoke-Expression
           closedvps version

@@ -37,6 +37,12 @@ dockers_v2:
       "org.opencontainers.image.version": "{{ .Version }}"
       "org.opencontainers.image.revision": "{{ .FullCommit }}"
 
+release:
+  # closedvps.com/install.sh and install.ps1 serve these from the latest release.
+  extra_files:
+    - glob: install/install.sh
+    - glob: install/install.ps1
+
 changelog:
   use: github
   sort: asc

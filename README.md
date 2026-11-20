@@ -217,8 +217,8 @@ Other agents can load it directly.
 
 ## Development
 
-[CONTRIBUTING.md](CONTRIBUTING.md) has the checks and how the code is laid out. The site and the install
-scripts are in [site/](site/).
+[CONTRIBUTING.md](CONTRIBUTING.md) has the checks and how the code is laid out. The install scripts are in
+[install/](install/), and closedvps.com is on the [site branch](https://github.com/tulayha/closedvps/tree/site).
 
 ## License
 

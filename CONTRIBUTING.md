@@ -41,7 +41,9 @@ A failing input lands in `testdata/fuzz/` and stays there as a test.
 | `internal/cloudinit` | the first-boot setup and the checks on what goes in it; `testdata/*.yaml` is the whole setup |
 | `internal/alert` | alert links and the requests that deliver to them |
 | `skills/closedvps` | the agent skill, also a Claude Code plugin (`claude plugin validate .`) |
-| `site/` | closedvps.com and the install scripts |
+| `install/` | install.sh and install.ps1, attached to each release and served at closedvps.com |
+
+The website, closedvps.com, is on the `site` branch, which has its own README.
 
 A change to the first-boot setup shows up as a diff in `internal/cloudinit/testdata/`: run
 `go test ./internal/cloudinit -update` and read it. Flags, environment variables and exit codes live in the

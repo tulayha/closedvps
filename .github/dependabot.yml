@@ -14,7 +14,8 @@ updates:
     directory: /
     schedule: { interval: weekly }
   - package-ecosystem: npm
-    directory: /site
+    directory: /
+    target-branch: site
     schedule: { interval: weekly }
     groups:
       site: { patterns: ["*"] }
