@@ -28,7 +28,7 @@ func TestRenderMinimal(t *testing.T) {
 	}
 	for _, want := range []string{
 		"#cloud-config\n", `hostname: "vps"`, `- name: "dev"`, `"` + key + `"`, "AllowUsers dev",
-		"PasswordAuthentication no", "Automatic-Reboot \"true\"", `{ "ip": "127.0.0.1" }`,
+		"PasswordAuthentication no", "Automatic-Reboot \"true\"", `"com.docker.network.bridge.host_binding_ipv4": "127.0.0.1"`,
 		"tailscale up --auth-key=file:/var/lib/closedvps/tailscale-key --hostname=vps",
 		`content: "tskey-auth-abc123-XYZ"`,
 		"- nftables", "ip daddr 169.254.169.254 meta skuid != 0 drop", "enable --now closedvps-metadata.service",

@@ -46,9 +46,10 @@ write_files:
       // First boot: wait for the daily apt run instead of failing on its lock.
       DPkg::Lock::Timeout "600";
   # Docker, if installed later, publishes container ports on 127.0.0.1 unless told otherwise.
+  # "ip" covers the default bridge only; default-network-opts covers the networks Compose makes.
   - path: /etc/docker/daemon.json
     content: |
-      { "ip": "127.0.0.1" }
+      { "ip": "127.0.0.1", "default-network-opts": { "bridge": { "com.docker.network.bridge.host_binding_ipv4": "127.0.0.1" } } }
   # This whole setup, Tailscale key included, stays readable from Hetzner's metadata service for the
   # server's life. Only root (cloud-init) may read it from here on, and containers never can.
   - path: /etc/closedvps/metadata.nft

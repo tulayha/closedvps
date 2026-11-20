@@ -145,7 +145,7 @@ On first boot, cloud-init on the server:
 - installs all updates and turns on unattended upgrades, which reboot the server at 04:00 UTC when an update
   needs it;
 - joins your tailnet under the server's name, after that first reboot if the kernel was updated;
-- sets Docker, should you install it later, to publish container ports on 127.0.0.1;
+- sets Docker, should you install it later, to publish container ports on 127.0.0.1, on Compose networks too;
 - with `CLOUDFLARE_TUNNEL_TOKEN`, installs cloudflared from Cloudflare's apt repository and runs your tunnel;
 - with `--claude`, installs Claude Code for your user, plus what its sandbox needs. Run `claude` on the
   server to log in.

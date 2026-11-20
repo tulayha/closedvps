@@ -82,9 +82,17 @@ can't log in. Security updates install daily, with a reboot at 04:00 UTC when on
 7 daily copies for 20% of the server price, when you turn them on with `--backups`.
 
 Pass `CLOUDFLARE_TUNNEL_TOKEN` and the server runs your Cloudflare Tunnel, for sites you want public. If you
-install Docker later, ports you publish bind to 127.0.0.1; to reach one from your laptop, publish it on the
+install Docker later, ports you publish bind to 127.0.0.1, in Compose too; to reach one from your laptop, publish it on the
 server's Tailscale IP (`-p 100.x.y.z:3000:3000`). `--claude` adds Claude Code, which you log in to with your own
 account.
+
+## Why every port is closed
+
+In October a Linux bug let anyone on the internet take over a server listening for Multipath TCP, and Ubuntu had
+no fix for two weeks after that was shown. A server behind a firewall with no inbound rules never received those
+packets, and its daily updates rebooted it into the fix once Ubuntu had one.
+[Why ClosedVPS closes every port](https://closedvps.com/why) has the dates and pairs each part with the NIST,
+CISA, CIS or vendor text that asks for it.
 
 ## If Tailscale stops working
 
