@@ -1,0 +1,104 @@
+---
+import Layout from "../layouts/Layout.astro";
+import body from "../body/index.html?raw";
+import { terminal } from "../terminal.js";
+
+const { story, lines } = await terminal();
+const website = { "@context": "https://schema.org", "@type": "WebSite", "name": "ClosedVPS", "url": "https://closedvps.com/" };
+const app = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ClosedVPS",
+  "url": "https://closedvps.com/",
+  "description": "Command-line tool that buys a Hetzner Cloud server behind a firewall with no inbound rules, with SSH only over Tailscale, optional Cloudflare Tunnel and automatic security updates. Retries while Hetzner is sold out, up to a price cap.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "codeRepository": "https://github.com/tulayha/closedvps",
+  "downloadUrl": "https://github.com/tulayha/closedvps/releases/latest",
+  "installUrl": "https://closedvps.com/install.sh"
+};
+---
+<Layout path="/" schema={[website, app]}>
+<Fragment set:html={body.replace("<!--story-->", lines)} />
+<script is:inline slot="scripts" define:vars={{ story }}>
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-copy]");
+  if (!b) return;
+  try { await navigator.clipboard.writeText(b.dataset.copy); } catch { return; }
+  b.classList.add("copied"); setTimeout(() => b.classList.remove("copied"), 1400);
+});
+document.querySelectorAll("[data-os]").forEach((b) => b.addEventListener("click", () => {
+  const box = b.closest(".install");
+  box.querySelectorAll("[data-os]").forEach((x) => x.setAttribute("aria-selected", x === b));
+  box.querySelectorAll("[data-cmd]").forEach((x) => (x.hidden = x.dataset.cmd !== b.dataset.os));
+}));
+
+// The run, typed out one step at a time. Without JavaScript #story shows the whole run as plain text.
+(() => {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pane = document.getElementById("pane");
+  const full = document.getElementById("story");
+  // steps: waiting, bought, set up, checked from outside
+  const cut = [story.findIndex(([k]) => k === "wait"), story.findIndex(([, x]) => x.startsWith("First-boot")), story.findIndex(([k], i) => i > 0 && k === "cmd")];
+  const steps = [story.slice(0, cut[0]), story.slice(cut[0], cut[1]), story.slice(cut[1], cut[2]), story.slice(cut[2])];
+  const html = ([k, x]) => k === "cmd" ? `<span class="dim">$</span> <span class="b">${x}</span>` : k === "dots" ? `${x}............ <span class="ok">online</span>` : k === "prompt" ? `${x}<span class="cursor"></span>` : x;
+  const draw = (pre, st) => { pre.innerHTML = st.map((s) => `<span class="ln">${html(s)}</span>`).join(""); };
+  full.classList.add("sr");
+  // every step drawn once, stacked and hidden, so the box keeps the tallest one's height
+  for (const st of steps) { const p = document.createElement("pre"); p.className = "hide"; p.setAttribute("aria-hidden", "true"); draw(p, st); pane.append(p); }
+  const live = document.createElement("pre"); live.setAttribute("aria-hidden", "true"); pane.append(live);
+
+  let run = 0;
+  const sleep = (ms, id) => new Promise((ok, stop) => setTimeout(() => (id === run ? ok() : stop()), ms));
+  const add = (h) => { const s = document.createElement("span"); s.className = "ln"; s.innerHTML = h; live.append(s); return s; };
+  const pause = { cmd: 300, wait: 1100, ok: 700, prompt: 0, out: 380 };
+  const length = (st) => st.reduce((ms, [k, x]) => ms + (k === "cmd" ? x.length * 38 : k === "dots" ? 1430 : 0) + (pause[k] ?? 0), 0);
+  async function play(st) {
+    const id = ++run;
+    live.textContent = "";
+    try {
+      for (const [k, x] of st) {
+        if (k === "cmd") {
+          const s = add('<span class="dim">$</span> <span class="b"></span>');
+          for (const ch of x) { s.lastChild.append(ch); await sleep(38, id); }
+        } else if (k === "dots") {
+          const s = add(x);
+          for (let i = 0; i < 12; i++) { s.append("."); await sleep(90, id); }
+          s.insertAdjacentHTML("beforeend", ' <span class="ok">online</span>');
+          await sleep(350, id);
+          continue;
+        } else add(html([k, x]));
+        await sleep(pause[k] ?? 380, id);
+      }
+      return true;
+    } catch { return false; }
+  }
+
+  const tabs = [...document.querySelectorAll("[data-step]")];
+  let cur = 0, auto = !reduced;
+  function select(i) {
+    cur = i;
+    tabs.forEach((b, j) => { b.setAttribute("aria-selected", i === j); b.classList.remove("playing"); });
+    document.getElementById("stepname").textContent = `${i + 1} of 4`;
+    document.getElementById("prev").disabled = i === 0;
+    document.getElementById("next").disabled = i === 3;
+    if (!reduced) { tabs[i].style.setProperty("--dur", length(steps[i]) + "ms"); void tabs[i].offsetWidth; tabs[i].classList.add("playing"); }
+  }
+  async function go(i) {
+    select(i);
+    if (reduced) { run++; draw(live, steps[i]); return; }
+    const done = await play(steps[i]);
+    if (done && auto && i < 3) { await new Promise((r) => setTimeout(r, 1600)); if (auto) go(i + 1); }
+  }
+  const pick = (i) => { auto = false; go(i); };
+  tabs.forEach((b, i) => b.addEventListener("click", () => pick(i)));
+  document.getElementById("prev").addEventListener("click", () => pick(Math.max(0, cur - 1)));
+  document.getElementById("next").addEventListener("click", () => pick(Math.min(3, cur + 1)));
+  if (reduced) go(0);
+  else new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { o.disconnect(); go(0); } }, { threshold: 0.35 }).observe(pane);
+})();
+</script>
+</Layout>

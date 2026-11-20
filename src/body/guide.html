@@ -1,0 +1,45 @@
+<div class="docgrid">
+<main class="doc">
+  <h1>How to lock down a Hetzner VPS by hand</h1>
+  <p>These steps give a new Hetzner server no open ports, SSH only over Tailscale and automatic security
+    updates. <a href="/">ClosedVPS</a> does this in one command, adds a non-root user, and keeps trying while Hetzner is sold out. The server joins Tailscale on its first boot, so port 22 is never open to the internet. If you lock
+    yourself out, add an inbound rule for TCP 22 from your own IP to the firewall, SSH to the public IP, fix
+    Tailscale and delete the rule. On a server that's already running, install Tailscale and SSH in over it
+    before you attach the firewall.</p>
+
+  <h2 id="1-make-the-firewall-first">1. Make the firewall first</h2>
+  <p>In the Hetzner Console open Firewalls, Create Firewall, delete the SSH and ICMP rules it suggests, and save.
+    A Hetzner firewall with no inbound rules drops every incoming packet. Outbound stays open.</p>
+
+  <h2 id="2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</h2>
+  <p>Make a one-off auth key at login.tailscale.com/admin/settings/keys. Create the server with your SSH key,
+    the new firewall selected, and this under Cloud config. Once it shows up in the Tailscale admin, turn off
+    key expiry for it, or it drops off your tailnet after 180 days.</p>
+  <pre class="term"><code>#cloud-config
+runcmd:
+  - curl -fsSL https://tailscale.com/install.sh -o /tmp/ts.sh
+  - sh /tmp/ts.sh
+  - tailscale up --auth-key=tskey-auth-XXXX --hostname=vps</code></pre>
+
+  <h2 id="3-turn-off-ssh-passwords">3. Turn off SSH passwords</h2>
+  <p>Then <code>ssh root@vps</code> and run:</p>
+  <pre class="term"><code>cat &gt; /etc/ssh/sshd_config.d/10-local.conf &lt;&lt;'END'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+END
+systemctl restart ssh</code></pre>
+
+  <h2 id="4-let-security-updates-reboot-it">4. Let security updates reboot it</h2>
+  <p>Ubuntu already installs security updates every day. A kernel update only takes effect after a reboot, so let it reboot at 04:00 UTC when one is needed:</p>
+  <pre class="term"><code>cat &gt; /etc/apt/apt.conf.d/52reboot &lt;&lt;'END'
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
+END</code></pre>
+
+  <h2 id="5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</h2>
+  <p>In the Cloudflare dashboard go to Networking, Tunnels, Create a tunnel, and run the install command it shows
+    on the server. Then on the tunnel's Routes tab add a published application with the service URL
+    <code>http://127.0.0.1:3000</code> (your app's port). The tunnel connects outward, so the firewall stays shut.</p>
+</main>
+<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#1-make-the-firewall-first">1. Make the firewall first</a><a href="#2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</a><a href="#3-turn-off-ssh-passwords">3. Turn off SSH passwords</a><a href="#4-let-security-updates-reboot-it">4. Let security updates reboot it</a><a href="#5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</a></nav>
+</div>

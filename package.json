@@ -3,11 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "build": "node scripts/terminal.mjs"
+    "build": "astro build",
+    "dev": "astro build && wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
+    "@astrojs/sitemap": "3.7.6",
+    "astro": "7.4.13",
+    "astro-llms-md": "3.0.3",
     "wrangler": "4.164.0"
   }
 }

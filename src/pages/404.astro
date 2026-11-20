@@ -1,0 +1,7 @@
+---
+import Layout from "../layouts/Layout.astro";
+import body from "../body/404.html?raw";
+---
+<Layout path="/404" notFound>
+<Fragment set:html={body} />
+</Layout>

@@ -1,56 +1,3 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClosedVPS: a Hetzner VPS even when it's sold out, no open ports</title>
-<meta name="description" content="Hetzner CX23 not available? This free CLI checks every minute, buys within your price cap and sets the VPS up with no open ports and SSH over Tailscale.">
-<link rel="canonical" href="https://closedvps.com/">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://closedvps.com/">
-<meta property="og:title" content="ClosedVPS: a Hetzner VPS even when it's sold out, no open ports">
-<meta property="og:description" content="Hetzner CX23 not available? This free CLI checks every minute, buys within your price cap and sets the VPS up with no open ports and SSH over Tailscale.">
-<meta property="og:image" content="https://closedvps.com/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="A Hetzner server with every port closed: the internet is blocked by a firewall with 0 inbound rules, your laptop gets in over Tailscale">
-<meta property="og:site_name" content="ClosedVPS">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
-<link rel="stylesheet" href="/site.css">
-<link rel="alternate" type="text/markdown" href="/index.md">
-<script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
-document.documentElement.classList.add("js");</script>
-<script type="application/ld+json">
-{ "@context": "https://schema.org", "@type": "WebSite", "name": "ClosedVPS", "url": "https://closedvps.com/" }
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "ClosedVPS",
-  "url": "https://closedvps.com/",
-  "description": "Command-line tool that buys a Hetzner Cloud server behind a firewall with no inbound rules, with SSH only over Tailscale, optional Cloudflare Tunnel and automatic security updates. Retries while Hetzner is sold out, up to a price cap.",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "macOS, Linux, Windows",
-  "license": "https://opensource.org/licenses/MIT",
-  "isAccessibleForFree": true,
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "codeRepository": "https://github.com/tulayha/closedvps",
-  "downloadUrl": "https://github.com/tulayha/closedvps/releases/latest",
-  "installUrl": "https://closedvps.com/install.sh"
-}
-</script>
-</head>
-<body>
-<div class="wrap">
-<header class="top">
-  <a class="brand" href="/"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>ClosedVPS</a>
-  <nav><a href="/why">Why</a><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a><button class="theme" type="button" aria-label="Switch light or dark"><svg class="i moon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg><svg class="i sun" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></button></nav>
-</header>
 <main>
 
 <section class="hero">
@@ -89,7 +36,7 @@ document.documentElement.classList.add("js");</script>
     </div>
     <figure class="stage" style="margin:0" aria-label="A ClosedVPS run: waiting for stock, buying, then the server unreachable from the internet but reachable over Tailscale">
       <div class="bar-top"><span>closedvps create · 19 Nov 2026</span><span class="nav"><button id="prev" aria-label="Previous step"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m15 18-6-6 6-6" /></svg></button><span id="stepname">1 of 4</span><button id="next" aria-label="Next step"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m9 18 6-6-6-6" /></svg></button></span></div>
-      <div class="pane" id="pane"><pre id="story"><span class="ln"><span class="dim">$</span> <span class="b">closedvps create</span></span><span class="ln">Buys the first of these Hetzner has in stock (per month with IPv4, before VAT):</span><span class="ln">  <span class="b">cx23</span>   nbg1   2 cores    4 GB x86  <span class="hl">5.99 EUR/month</span></span><span class="ln">  <span class="b">cax11</span>  hel1   2 cores    4 GB arm  <span class="hl">6.49 EUR/month</span></span><span class="ln">Buy it? [y/N] <span class="b">y</span></span><span class="ln">Firewall closedvps-vps ready, <span class="ok">no inbound rules</span></span><span class="ln"><span class="dim">09:14:02</span>  <span class="warn">nothing on your list is in stock</span> <span class="dim">(check 1)</span></span><span class="ln"><span class="dim">Trying again every minute until one is bought. Ctrl+C stops.</span></span><span class="ln"><span class="dim">... 2 hours later ...</span></span><span class="ln"><span class="dim">11:43:02</span>  <span class="ok">cax11 hel1   vps bought</span>, <span class="hl">6.49 EUR/month</span></span><span class="ln">vps is running at 203.0.113.1, <span class="ok">unreachable from the internet</span>.</span><span class="ln">First-boot setup takes 3 to 5 minutes.</span><span class="ln">Waiting for vps to join your tailnet............ <span class="ok">online</span></span><span class="ln"><span class="b ok">Ready: ssh dev@vps</span></span><span class="ln"><span class="warn">In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.</span></span><span class="ln"><span class="dim">$</span> <span class="b">nmap -Pn 203.0.113.1</span></span><span class="ln">All 1000 scanned ports on 203.0.113.1 are in ignored states.</span><span class="ln">Not shown: <span class="ok">1000 filtered tcp ports</span> (no-response)</span><span class="ln"><span class="dim">$</span> <span class="b">ssh dev@vps</span></span><span class="ln"><span class="ok">dev@vps</span>:<span class="hl">~</span>$ <span class="cursor"></span></span></pre></div>
+      <div class="pane" id="pane"><pre id="story"><code><!--story--></code></pre></div>
     </figure>
   </div>
 </section>
@@ -112,22 +59,34 @@ document.documentElement.classList.add("js");</script>
   <div class="sheet">
     <h3>On every server</h3>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></svg><div><div class="t">No inbound rules</div><p>A Hetzner firewall that lets nothing in, attached before the first boot. <code>closedvps list</code> warns if another firewall opens it.</p></div>
-      <div class="proof"><small>from your laptop</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">nmap</span> <span class="tk">-Pn</span> <span class="tk">203.0.113.1</span></span><span class="ln"><span class="tk">Not</span> <span class="tk">shown:</span> <span class="tk"><span class="ok">1000</span></span> <span class="tk"><span class="ok">filtered</span></span> <span class="tk"><span class="ok">tcp</span></span> <span class="tk"><span class="ok">ports</span></span></span></pre></div></div>
+      <div class="proof"><small>from your laptop</small><pre><code><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">nmap</span> <span class="tk">-Pn</span> <span class="tk">203.0.113.1</span>
+</span><span class="ln"><span class="tk">Not</span> <span class="tk">shown:</span> <span class="tk"><span class="ok">1000</span></span> <span class="tk"><span class="ok">filtered</span></span> <span class="tk"><span class="ok">tcp</span></span> <span class="tk"><span class="ok">ports</span></span>
+</span></code></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="16" y="16" width="6" height="6" rx="1" /><rect x="2" y="16" width="6" height="6" rx="1" /><rect x="9" y="2" width="6" height="6" rx="1" /><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" /><path d="M12 12V8" /></svg><div><div class="t">SSH over Tailscale only</div><p>Key login for your user. Root and passwords can't log in.</p></div>
-      <div class="proof"><small>the server&#x27;s SSH settings</small><pre><span class="ln"><span class="tk">PermitRootLogin</span> <span class="tk"><span class="ok">no</span></span></span><span class="ln"><span class="tk">PasswordAuthentication</span> <span class="tk"><span class="ok">no</span></span></span></pre></div></div>
+      <div class="proof"><small>the server&#x27;s SSH settings</small><pre><code><span class="ln"><span class="tk">PermitRootLogin</span> <span class="tk"><span class="ok">no</span></span>
+</span><span class="ln"><span class="tk">PasswordAuthentication</span> <span class="tk"><span class="ok">no</span></span>
+</span></code></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg><div><div class="t">Security updates daily</div><p>With a reboot at 04:00 UTC when one needs it.</p></div>
-      <div class="proof"><small>/etc/apt/apt.conf.d/52closedvps</small><pre><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot</span> <span class="tk"><span class="ok">"true"</span>;</span></span><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot-Time</span> <span class="tk"><span class="ok">"04:00"</span>;</span></span></pre></div></div>
+      <div class="proof"><small>/etc/apt/apt.conf.d/52closedvps</small><pre><code><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot</span> <span class="tk"><span class="ok">"true"</span>;</span>
+</span><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot-Time</span> <span class="tk"><span class="ok">"04:00"</span>;</span>
+</span></code></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z" /><path d="M10 21.9V14L2.1 9.1" /><path d="m10 14 11.9-6.9" /><path d="M14 19.8v-8.1" /><path d="M18 17.5V9.4" /></svg><div><div class="t">Docker stays private</div><p>Published ports bind to 127.0.0.1, Compose's too, so a container can't open one by accident.</p></div>
-      <div class="proof"><small>/etc/docker/daemon.json, in short</small><pre><span class="ln"><span class="tk">"ip":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span></span><span class="ln"><span class="tk">"…host_binding_ipv4":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span></span></pre></div></div>
+      <div class="proof"><small>/etc/docker/daemon.json, in short</small><pre><code><span class="ln"><span class="tk">"ip":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span>
+</span><span class="ln"><span class="tk">"…host_binding_ipv4":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span>
+</span></code></pre></div></div>
     <h3>Optional</h3>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></svg><div><div class="t">Several at once, under a cap</div><p>Up to ten as stock appears, capped per type and in total.</p></div>
-      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--count</span> <span class="tk">10</span> <span class="tk">--type</span> <span class="tk">cx23:6,cx33:12</span> <span class="tk">--max-total</span> <span class="tk">90</span></span></pre></div></div>
+      <div class="proof"><small>the command</small><pre><code><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--count</span> <span class="tk">10</span> <span class="tk">--type</span> <span class="tk">cx23:6,cx33:12</span> <span class="tk">--max-total</span> <span class="tk">90</span>
+</span></code></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="20" height="5" x="2" y="3" rx="1" /><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /><path d="M10 12h4" /></svg><div><div class="t">Backups</div><p>7 daily copies for 20% of the server price, off unless you turn them on.</p></div>
-      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--backups</span></span></pre></div></div>
+      <div class="proof"><small>the command</small><pre><code><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--backups</span>
+</span></code></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg><div><div class="t">Cloudflare Tunnel</div><p>For sites you want public. It connects outward, so the firewall stays closed.</p></div>
-      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">CLOUDFLARE_TUNNEL_TOKEN=…</span> <span class="tk">closedvps</span> <span class="tk">create</span></span></pre></div></div>
+      <div class="proof"><small>the command</small><pre><code><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">CLOUDFLARE_TUNNEL_TOKEN=…</span> <span class="tk">closedvps</span> <span class="tk">create</span>
+</span></code></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg><div><div class="t">Claude Code</div><p>Installed for your own user with what its sandbox needs, signed in with your own account (<a href="/claude-code">setup and phone access</a>).</p></div>
-      <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--claude</span></span></pre></div></div>
+      <div class="proof"><small>the command</small><pre><code><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--claude</span>
+</span></code></pre></div></div>
   </div>
 </section>
 
@@ -150,101 +109,11 @@ document.documentElement.classList.add("js");</script>
   <h2>If Tailscale stops working</h2>
   <div class="aside">
     <p class="sub">Open port 22 to your own IP, fix Tailscale over SSH, then close it again.</p>
-    <pre class="term"><span class="dim">$</span> closedvps open-ssh vps
+    <pre class="term"><code><span class="dim">$</span> closedvps open-ssh vps
 <span class="dim">$</span> ssh dev@203.0.113.1
-<span class="dim">$</span> closedvps close-ssh vps</pre>
+<span class="dim">$</span> closedvps close-ssh vps</code></pre>
   </div>
 </section>
 
 <a class="cta" href="/guide"><div class="s">Rather do it yourself?</div><div class="t">How to lock down a Hetzner VPS by hand</div><span class="go">Read the guide →</span></a>
 </main>
-
-<footer><a href="/claude-code">Claude Code on a VPS</a><a href="/sold-out">When Hetzner is sold out</a><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
-</div>
-<script>
-document.querySelector(".theme").addEventListener("click", () => {
-  const root = document.documentElement;
-  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-  root.dataset.theme = dark ? "light" : "dark";
-  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
-});
-document.addEventListener("click", async (e) => {
-  const b = e.target.closest("[data-copy]");
-  if (!b) return;
-  try { await navigator.clipboard.writeText(b.dataset.copy); } catch { return; }
-  b.classList.add("copied"); setTimeout(() => b.classList.remove("copied"), 1400);
-});
-document.querySelectorAll("[data-os]").forEach((b) => b.addEventListener("click", () => {
-  const box = b.closest(".install");
-  box.querySelectorAll("[data-os]").forEach((x) => x.setAttribute("aria-selected", x === b));
-  box.querySelectorAll("[data-cmd]").forEach((x) => (x.hidden = x.dataset.cmd !== b.dataset.os));
-}));
-
-// The run, typed out one step at a time. Without JavaScript #story shows the whole run as plain text.
-(() => {
-  const story = [["cmd","closedvps create"],["out","Buys the first of these Hetzner has in stock (per month with IPv4, before VAT):"],["out","  <span class=\"b\">cx23</span>   nbg1   2 cores    4 GB x86  <span class=\"hl\">5.99 EUR/month</span>"],["out","  <span class=\"b\">cax11</span>  hel1   2 cores    4 GB arm  <span class=\"hl\">6.49 EUR/month</span>"],["out","Buy it? [y/N] <span class=\"b\">y</span>"],["out","Firewall closedvps-vps ready, <span class=\"ok\">no inbound rules</span>"],["out","<span class=\"dim\">09:14:02</span>  <span class=\"warn\">nothing on your list is in stock</span> <span class=\"dim\">(check 1)</span>"],["out","<span class=\"dim\">Trying again every minute until one is bought. Ctrl+C stops.</span>"],["wait","<span class=\"dim\">... 2 hours later ...</span>"],["out","<span class=\"dim\">11:43:02</span>  <span class=\"ok\">cax11 hel1   vps bought</span>, <span class=\"hl\">6.49 EUR/month</span>"],["out","vps is running at 203.0.113.1, <span class=\"ok\">unreachable from the internet</span>."],["out","First-boot setup takes 3 to 5 minutes."],["dots","Waiting for vps to join your tailnet"],["ok","<span class=\"b ok\">Ready: ssh dev@vps</span>"],["out","<span class=\"warn\">In the Tailscale admin, turn off key expiry for vps, or it drops off your tailnet after 180 days.</span>"],["cmd","nmap -Pn 203.0.113.1"],["out","All 1000 scanned ports on 203.0.113.1 are in ignored states."],["out","Not shown: <span class=\"ok\">1000 filtered tcp ports</span> (no-response)"],["cmd","ssh dev@vps"],["prompt","<span class=\"ok\">dev@vps</span>:<span class=\"hl\">~</span>$ "]];
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const pane = document.getElementById("pane");
-  const full = document.getElementById("story");
-  // steps: waiting, bought, set up, checked from outside
-  const cut = [story.findIndex(([k]) => k === "wait"), story.findIndex(([, x]) => x.startsWith("First-boot")), story.findIndex(([k], i) => i > 0 && k === "cmd")];
-  const steps = [story.slice(0, cut[0]), story.slice(cut[0], cut[1]), story.slice(cut[1], cut[2]), story.slice(cut[2])];
-  const html = ([k, x]) => k === "cmd" ? `<span class="dim">$</span> <span class="b">${x}</span>` : k === "dots" ? `${x}............ <span class="ok">online</span>` : k === "prompt" ? `${x}<span class="cursor"></span>` : x;
-  const draw = (pre, st) => { pre.innerHTML = st.map((s) => `<span class="ln">${html(s)}</span>`).join(""); };
-  full.classList.add("sr");
-  // every step drawn once, stacked and hidden, so the box keeps the tallest one's height
-  for (const st of steps) { const p = document.createElement("pre"); p.className = "hide"; p.setAttribute("aria-hidden", "true"); draw(p, st); pane.append(p); }
-  const live = document.createElement("pre"); live.setAttribute("aria-hidden", "true"); pane.append(live);
-
-  let run = 0;
-  const sleep = (ms, id) => new Promise((ok, stop) => setTimeout(() => (id === run ? ok() : stop()), ms));
-  const add = (h) => { const s = document.createElement("span"); s.className = "ln"; s.innerHTML = h; live.append(s); return s; };
-  const pause = { cmd: 300, wait: 1100, ok: 700, prompt: 0, out: 380 };
-  const length = (st) => st.reduce((ms, [k, x]) => ms + (k === "cmd" ? x.length * 38 : k === "dots" ? 1430 : 0) + (pause[k] ?? 0), 0);
-  async function play(st) {
-    const id = ++run;
-    live.textContent = "";
-    try {
-      for (const [k, x] of st) {
-        if (k === "cmd") {
-          const s = add('<span class="dim">$</span> <span class="b"></span>');
-          for (const ch of x) { s.lastChild.append(ch); await sleep(38, id); }
-        } else if (k === "dots") {
-          const s = add(x);
-          for (let i = 0; i < 12; i++) { s.append("."); await sleep(90, id); }
-          s.insertAdjacentHTML("beforeend", ' <span class="ok">online</span>');
-          await sleep(350, id);
-          continue;
-        } else add(html([k, x]));
-        await sleep(pause[k] ?? 380, id);
-      }
-      return true;
-    } catch { return false; }
-  }
-
-  const tabs = [...document.querySelectorAll("[data-step]")];
-  let cur = 0, auto = !reduced;
-  function select(i) {
-    cur = i;
-    tabs.forEach((b, j) => { b.setAttribute("aria-selected", i === j); b.classList.remove("playing"); });
-    document.getElementById("stepname").textContent = `${i + 1} of 4`;
-    document.getElementById("prev").disabled = i === 0;
-    document.getElementById("next").disabled = i === 3;
-    if (!reduced) { tabs[i].style.setProperty("--dur", length(steps[i]) + "ms"); void tabs[i].offsetWidth; tabs[i].classList.add("playing"); }
-  }
-  async function go(i) {
-    select(i);
-    if (reduced) { run++; draw(live, steps[i]); return; }
-    const done = await play(steps[i]);
-    if (done && auto && i < 3) { await new Promise((r) => setTimeout(r, 1600)); if (auto) go(i + 1); }
-  }
-  const pick = (i) => { auto = false; go(i); };
-  tabs.forEach((b, i) => b.addEventListener("click", () => pick(i)));
-  document.getElementById("prev").addEventListener("click", () => pick(Math.max(0, cur - 1)));
-  document.getElementById("next").addEventListener("click", () => pick(Math.min(3, cur + 1)));
-  if (reduced) go(0);
-  else new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { o.disconnect(); go(0); } }, { threshold: 0.35 }).observe(pane);
-})();
-</script>
-</body>
-</html>

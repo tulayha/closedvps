@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://closedvps.com/sitemap.xml
+Sitemap: https://closedvps.com/sitemap-index.xml

@@ -1,4 +1,4 @@
-// Draws public/og.png, the 1200x630 link preview, from the home page's own headline and diagram, so the image
+// Draws public/og.png, the 1200x630 link preview, from the built home page's headline and diagram (run npm run build first), so the image
 // changes when they do. Needs a Chrome or Chromium: CHROME=/path/to/chrome node scripts/og.mjs
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -7,7 +7,7 @@ const here = new URL("..", import.meta.url).pathname;
 const require = createRequire(process.env.PLAYWRIGHT_CORE ?? import.meta.url);
 const { chromium } = require("playwright-core");
 
-const index = readFileSync(`${here}public/index.html`, "utf8");
+const index = readFileSync(`${here}dist/index.html`, "utf8");
 const pick = (re) => index.match(re)[0];
 const brand = pick(/<a class="brand"[\s\S]*?<\/a>/);
 const title = pick(/<h1>[\s\S]*?<\/h1>/);
