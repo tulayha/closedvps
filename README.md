@@ -133,7 +133,7 @@ journalctl --user -u closedvps -f
 
 The exit code says how it ended, and 3 always means a server is billing; `closedvps create --help` lists the
 codes. `--json` prints one event per line on stdout and moves the text to stderr, for scripts and agents. The
-[skill](skills/closedvps/SKILL.md) describes the events.
+[skill](skills/closedvps/references/events.md) describes the events.
 
 ## What it creates
 
@@ -255,7 +255,8 @@ as a plugin:
 /plugin install closedvps --marketplace tulayha/closedvps
 ```
 
-Other agents can load it directly.
+It adds `/closedvps:create` and `/closedvps:delete`, and asks you to approve every real buy or delete the agent
+runs. Other agents can load the skill directly.
 
 ## Development
 
