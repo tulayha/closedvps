@@ -34,6 +34,7 @@ systemctl restart ssh</code></pre>
 Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "04:00";
 END</code></pre>
+  <p>Those daily updates only cover Ubuntu's main archive, which holds everything ClosedVPS installs. Packages from Universe, such as ffmpeg or the Python libraries apt installs, get Canonical's security fixes only with <a href="https://ubuntu.com/pro">Ubuntu Pro</a>, which is free for personal use and also brings Livepatch for kernel fixes without a reboot. If you install things from Universe, get a token from your <a href="https://ubuntu.com/pro/dashboard">Pro dashboard</a> and <a href="https://documentation.ubuntu.com/pro-client/en/latest/howtoguides/how_to_attach/">attach the server</a> with <code>sudo pro attach &lt;token&gt;</code>. The same daily updates then pick up the extra fixes.</p>
 
   <h2 id="5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</h2>
   <p>In the Cloudflare dashboard go to Networking, Tunnels, Create a <a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/">tunnel</a>, and run the install command it shows
