@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"charm.land/huh/v2"
+	"github.com/charmbracelet/colorprofile"
 	"github.com/gen2brain/beeep"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"golang.org/x/term"
@@ -38,7 +39,11 @@ type app struct {
 	tailscale func() string // the local Tailscale CLI, or "" without one
 	peers     func(ctx context.Context, bin string) ([]tsPeer, error)
 	sshUp     func(ip string) bool
-	awake     func() func() // keeps the computer from sleeping; returns the release
+	awake     func() func()                  // keeps the computer from sleeping; returns the release
+	onTailnet func(ctx context.Context) bool // this computer runs Tailscale and is logged in
+	keygen    func() error                   // runs ssh-keygen for a person at the terminal
+	tsBase    string                         // Tailscale API; empty is the real one
+	plain     bool                           // questions as plain numbered lines even in a terminal (tests)
 
 	watched     bool          // stdout and stderr are terminals, so a person sees the update note
 	installedBy string        // how this copy got here: fromRelease, fromGo, fromDocker or fromSource
@@ -66,6 +71,8 @@ func newApp() *app {
 		peers:     tailscalePeers,
 		sshUp:     sshAnswers,
 		awake:     keepAwake,
+		onTailnet: tailscaleRunning,
+		keygen:    sshKeygen,
 
 		watched:     term.IsTerminal(int(os.Stdout.Fd())) && term.IsTerminal(int(os.Stderr.Fd())),
 		installedBy: installedBy(),
@@ -96,22 +103,12 @@ func (a *app) connect() (*cloud.Client, error) {
 	return a.client(t), nil
 }
 
-// secret returns the value of env, or asks for it without echoing when running in a terminal.
-func (a *app) secret(env, prompt, help string) (string, error) {
-	if v := strings.TrimSpace(os.Getenv(env)); v != "" {
-		return v, nil
-	}
-	if !a.tty {
-		return "", fmt.Errorf("%s is not set (%s)", env, help)
-	}
-	return a.askSecret(prompt + "\n  " + help + "\n>")
-}
-
+// askSecret asks for a secret without echoing it, as "? prompt".
 func (a *app) askSecret(prompt string) (string, error) {
 	if !a.tty {
 		return "", errors.New("this question needs a terminal")
 	}
-	fmt.Fprintf(a.stderr, "%s ", prompt)
+	fmt.Fprintf(a.styled(), "%s %s ", cyan.Render("?"), prompt)
 	v, err := a.readSecret()
 	fmt.Fprintln(a.stderr)
 	if err != nil {
@@ -123,16 +120,20 @@ func (a *app) askSecret(prompt string) (string, error) {
 	return v, nil
 }
 
-// confirm asks a yes/no question; Enter takes the default, and without a terminal the answer is the default.
-func (a *app) confirm(q string, def bool) bool {
+// styled is stderr with colour dropped where the terminal, NO_COLOR or TERM says so.
+func (a *app) styled() io.Writer { return colorprofile.NewWriter(a.stderr, os.Environ()) }
+
+// yesNo asks a yes/no question, with the default in capitals; Enter takes it, and without a terminal the
+// answer is the default.
+func (a *app) yesNo(q string, def bool) bool {
 	if !a.tty {
 		return def
 	}
-	hint := "[y/N]"
+	hint := "(y/N)"
 	if def {
-		hint = "[Y/n]"
+		hint = "(Y/n)"
 	}
-	fmt.Fprintf(a.stderr, "%s %s ", q, hint)
+	fmt.Fprintf(a.styled(), "%s %s %s ", cyan.Render("?"), q, hint)
 	line, _ := a.in.ReadString('\n')
 	switch strings.ToLower(strings.TrimSpace(line)) {
 	case "y", "yes":
@@ -143,11 +144,22 @@ func (a *app) confirm(q string, def bool) bool {
 	return def
 }
 
+// choose asks for one of options and sets *choice to its index.
+func (a *app) choose(q string, options []string, choice *int) error {
+	var opts []huh.Option[int]
+	for i, o := range options {
+		opts = append(opts, huh.NewOption(o, i))
+	}
+	return a.question(huh.NewSelect[int]().Title(q).Options(opts...).Value(choice), func() string {
+		return cyan.Render("?") + " " + q + " " + options[*choice]
+	})
+}
+
 // question asks one thing with huh: its full prompt in a terminal, plain numbered lines otherwise (pipes,
 // tests). Ctrl+C in the prompt stops the command like Ctrl+C anywhere else. huh clears a finished
 // prompt, so record, if given, prints the answer to keep it on screen.
 func (a *app) question(f huh.Field, record func() string) error {
-	if !a.tty {
+	if !a.tty || a.plain {
 		return f.RunAccessible(a.stderr, &lineReader{r: a.in})
 	}
 	err := huh.NewForm(huh.NewGroup(f)).WithOutput(a.stderr).Run()
@@ -155,7 +167,7 @@ func (a *app) question(f huh.Field, record func() string) error {
 		return context.Canceled
 	}
 	if err == nil && record != nil {
-		fmt.Fprintln(a.stderr, record())
+		fmt.Fprintln(a.styled(), record())
 	}
 	return err
 }
@@ -188,18 +200,35 @@ func (a *app) hetznerToken() (string, error) {
 	if t := tokenStore.get(); t != "" {
 		return t, nil
 	}
-	t, err := a.secret("HCLOUD_TOKEN", "Hetzner API token (Read & Write):",
-		"Hetzner Console > your project > Security > API tokens. It's only ever sent to Hetzner.")
-	if err != nil {
-		return "", err
+	if !a.tty {
+		return "", fail("needs_key", "HCLOUD_TOKEN is not set",
+			"Make a Read & Write token at console.hetzner.com > Security > API tokens.")
 	}
-	if a.confirm("Save it so you don't have to paste it again?", true) {
-		where, err := tokenStore.save(t)
-		if err != nil {
-			fmt.Fprintf(a.stderr, "Couldn't save it: %v\n", err)
+	t, err := a.askSecret("Hetzner API token (console.hetzner.com > Security > API tokens, Read & Write)")
+	if err != nil {
+		return "", fail("needs_key", "No Hetzner token: "+err.Error())
+	}
+	if a.yesNo("Save it in your password store?", true) {
+		u := newUI(a.stderr, false, a.now)
+		if where, err := tokenStore.save(t); err != nil {
+			u.warn("Couldn't save it: %v", err)
 		} else {
-			fmt.Fprintf(a.stderr, "Saved in %s. `closedvps forget` removes it.\n", where)
+			u.ok("Saved in %s; closedvps forget removes it", where)
 		}
 	}
 	return t, nil
+}
+
+// tsCredentials is the Tailscale OAuth client: TS_OAUTH_CLIENT_ID and TS_OAUTH_CLIENT_SECRET, else the one
+// setup saved. saved says which.
+func tsCredentials() (id, secret string, saved bool) {
+	id, secret = strings.TrimSpace(os.Getenv("TS_OAUTH_CLIENT_ID")), strings.TrimSpace(os.Getenv("TS_OAUTH_CLIENT_SECRET"))
+	if id != "" && secret != "" {
+		return id, secret, false
+	}
+	id, secret, _ = strings.Cut(tsClientStore.get(), "\n")
+	if strings.TrimSpace(secret) == "" {
+		return "", "", false
+	}
+	return strings.TrimSpace(id), strings.TrimSpace(secret), true
 }

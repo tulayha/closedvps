@@ -33,20 +33,24 @@ func TestListEveryServer(t *testing.T) {
 	if err := tr.run(context.Background(), "list", "--json"); err != nil {
 		t.Fatal(err)
 	}
-	var rows []serverRow
-	if err := json.Unmarshal(tr.stdout.Bytes(), &rows); err != nil {
+	var got listing
+	if err := json.Unmarshal(tr.stdout.Bytes(), &got); err != nil {
 		t.Fatalf("%v\n%s", err, tr.stdout)
 	}
-	want := map[string]string{
-		"vps":    "closed",
-		"bare":   "OPEN: no firewall",
-		"web":    "OPEN: web: tcp 22 from 0.0.0.0/0,::/0",
-		"shut":   "closed",
-		"inside": "closed: no public IP",
+	rows := got.Servers
+	want := map[string][2]string{
+		"vps":    {"closed", "closed"},
+		"bare":   {"OPEN: no firewall", "open: every port"},
+		"web":    {"OPEN: web: tcp 22 from 0.0.0.0/0,::/0", "open: SSH"},
+		"shut":   {"closed", "closed"},
+		"inside": {"closed: no public IP", "closed, no public IP"},
 	}
 	for _, r := range rows {
-		if r.Firewall != want[r.Name] {
-			t.Errorf("%s: firewall %q, want %q", r.Name, r.Firewall, want[r.Name])
+		if w := want[r.Name]; r.Firewall != w[0] || r.Internet != w[1] {
+			t.Errorf("%s: firewall %q, internet %q, want %q", r.Name, r.Firewall, r.Internet, w)
+		}
+		if r.Price != 5.99 {
+			t.Errorf("%s: price %.2f, want 5.99 (5.49 and 0.50 for IPv4)", r.Name, r.Price)
 		}
 		if r.Managed != (r.Name == "vps") {
 			t.Errorf("%s: closedvps %v", r.Name, r.Managed)
@@ -56,12 +60,20 @@ func TestListEveryServer(t *testing.T) {
 		t.Errorf("%d rows, want %d", len(rows), len(want))
 	}
 
+	if len(got.Leftovers) != 0 {
+		t.Errorf("leftover firewalls %v, want none", got.Leftovers)
+	}
+
 	tr.stdout.Reset()
 	if err := tr.run(context.Background(), "list"); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(tr.stdout.String(), "closedvps.com/guide#close-a-server-you-already-have") {
-		t.Errorf("no pointer to the guide under OPEN servers:\n%s", tr.stdout)
+	if !strings.HasPrefix(tr.stdout.String(), "NAME\tTYPE\tWHERE\tEUR/MO\tINTERNET\n") {
+		t.Errorf("piped, the table should be tab-separated:\n%s", tr.stdout)
+	}
+	if !strings.Contains(tr.stderr.String(), "web takes SSH from the internet") ||
+		!strings.Contains(tr.stderr.String(), "closedvps.com/guide#close-a-server-you-already-have") {
+		t.Errorf("no warning with a pointer to the guide under open servers:\n%s", tr.stderr)
 	}
 }
 

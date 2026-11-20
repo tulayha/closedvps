@@ -8,7 +8,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"charm.land/huh/v2"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
@@ -18,18 +17,21 @@ import (
 	"github.com/tulayha/closedvps/internal/buy"
 	"github.com/tulayha/closedvps/internal/cloud"
 	"github.com/tulayha/closedvps/internal/cloudinit"
+	"github.com/tulayha/closedvps/internal/tsapi"
 )
 
 func newSetupCmd(a *app) *cobra.Command {
 	return &cobra.Command{
 		Use:   "setup",
-		Short: "Change your saved locations, types, price caps, backups and alerts",
-		Long: `Asks which locations, server types, price caps, backups and alerts you want, and saves the answers as
-the defaults for ` + "`closedvps create`" + `. Run it again to change them.`,
+		Short: "Save your defaults: what servers are for, locations, types, caps, alerts and Tailscale",
+		Long: `Asks what your servers are usually for, which locations, server types, price caps, backups and alerts you
+want, and optionally saves a Tailscale OAuth client. The answers become the defaults for ` + "`closedvps create`" + `,
+and its flags change them for one run. Nobody has to run setup: without it, create uses defaults and asks
+only what the server is for. Run it again to change the answers.`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if !a.tty {
-				return errors.New("setup asks questions, so run it in a terminal")
+				return fail("usage", "setup asks questions, so run it in a terminal", "closedvps create takes every answer as a flag.")
 			}
 			api, err := a.connect()
 			if err != nil {
@@ -54,7 +56,7 @@ func (a *app) text(title, def string, check func(string) error) (string, error) 
 		}
 		return check(strings.TrimSpace(s))
 	})
-	if err := a.question(in, func() string { return title + " " + cmp.Or(strings.TrimSpace(v), def) }); err != nil {
+	if err := a.question(in, func() string { return cyan.Render("?") + " " + title + " " + cmp.Or(strings.TrimSpace(v), def) }); err != nil {
 		return "", err
 	}
 	if v = strings.TrimSpace(v); v == "" {
@@ -64,7 +66,8 @@ func (a *app) text(title, def string, check func(string) error) (string, error) 
 	return v, check(v)
 }
 
-// setupWizard walks through the preferences with live prices and stock, saves them and returns them.
+// setupWizard walks through the preferences with live prices and stock, saves them and returns them. What
+// the servers are for comes first and the cap before the types, so the type list only shows what fits.
 func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (prefs, error) {
 	types, err := api.ServerTypes(ctx)
 	if err != nil {
@@ -78,16 +81,25 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 	if err != nil {
 		return p, err
 	}
-	out := a.stderr
-	fmt.Fprintln(out, "\nA few questions, asked once. The answers become the defaults for `closedvps create`; run `closedvps setup` to change them.")
+	u := newUI(a.stderr, false, a.now)
+	cur := currencyOr(prices.Currency)
 
-	fmt.Fprintln(out, "\nWhere should the server be? Hetzner's locations:")
-	w := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
-	for i, l := range locs {
-		fmt.Fprintf(w, "  %d\t%s\t%s, %s\n", i+1, l.Name, l.City, l.Country)
+	choice := slices.IndexFunc(purposes, func(x purpose) bool { return x.claude == p.Claude && x.codex == p.Codex })
+	if err := a.choose("What are your servers usually for?", purposeLabels(), &choice); err != nil {
+		return p, err
 	}
-	_ = w.Flush()
-	ans, err := a.text("Locations, numbers or names in the order to try them:", strings.Join(p.Locations, ","), func(s string) error {
+	p.Claude, p.Codex = purposes[choice].claude, purposes[choice].codex
+	var minMemory float64
+	if p.Claude || p.Codex {
+		minMemory = agentMemory
+	}
+
+	var where []string
+	for i, l := range locs {
+		where = append(where, fmt.Sprintf("%d %s %s", i+1, l.Name, l.City))
+	}
+	u.hint("%s", faint.Render("Hetzner's locations: "+strings.Join(where, ", ")))
+	ans, err := a.text("Locations, in order:", strings.Join(p.Locations, ", "), func(s string) error {
 		_, err := pickLocations(s, locs)
 		return err
 	})
@@ -98,32 +110,39 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 		return p, err
 	}
 
-	fmt.Fprintln(out, "\nWhich server types? Cheapest shared ones in those locations (per month, before VAT, IPv4 included):")
-	avail := buy.Availability(types)
-	seen := map[string]bool{}
-	w = tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "  TYPE\tCORES\tMEMORY\tARCH\tFROM\tIN STOCK NOW")
-	for _, c := range (buy.Wants{Locations: p.Locations}).Candidates(types, prices.IPv4) {
-		if seen[c.Type] || len(seen) == 10 {
-			continue
-		}
-		seen[c.Type] = true
-		var in []string
-		for _, l := range p.Locations {
-			if avail[c.Type+" "+l] {
-				in = append(in, l)
-			}
-		}
-		stock := "nowhere"
-		if len(in) > 0 {
-			stock = strings.Join(in, ", ")
-		}
-		fmt.Fprintf(w, "  %s\t%d\t%.0f GB\t%s\t%s\t%s\n", c.Type, c.Cores, c.Memory, c.Arch, buy.Money(c.Price, prices.Currency), stock)
+	p.Backups = a.yesNo("Turn on backups (7 daily copies, +20%)?", p.Backups)
+
+	with := "with IPv4"
+	if p.Backups {
+		with = "with IPv4 and backups"
 	}
-	_ = w.Flush()
-	fmt.Fprintln(out, "  `closedvps types --all` lists every type, dedicated ones included. A type can carry its own")
-	fmt.Fprintln(out, "  monthly cap, like cx23:6,cx33:12, and the others share the cap asked next. \"any\" tries the")
-	fmt.Fprintln(out, "  cheapest shared type in stock.")
+	var fits []buy.Candidate
+	for {
+		ans, err = a.text(fmt.Sprintf("Most per server, %s/mo before VAT %s:", cur, with), strconv.FormatFloat(p.MaxPrice, 'f', -1, 64), func(s string) error {
+			if _, ok := parseMoney(s); !ok {
+				return errors.New("a number above 0, please")
+			}
+			return nil
+		})
+		if err != nil {
+			return p, err
+		}
+		p.MaxPrice, _ = parseMoney(ans)
+		fits = (buy.Wants{Locations: p.Locations, MaxPrice: p.MaxPrice, Backups: p.Backups, MinMemory: minMemory}).Candidates(types, prices.IPv4)
+		if len(fits) > 0 {
+			break
+		}
+		open := (buy.Wants{Locations: p.Locations, Backups: p.Backups, MinMemory: minMemory}).Candidates(types, prices.IPv4)
+		if len(open) == 0 {
+			return p, fail("usage", "Hetzner sells nothing that fits in "+strings.Join(p.Locations, ", "), "Run setup again with other locations.")
+		}
+		cheapest := slices.MinFunc(open, func(x, y buy.Candidate) int { return cmp.Compare(x.Price, y.Price) })
+		u.warn("Nothing costs that little; the cheapest is %s at %s", cheapest.Type, buy.Money(cheapest.Price, cur))
+	}
+	u.line("")
+	slices.SortStableFunc(fits, func(x, y buy.Candidate) int { return cmp.Compare(x.Price, y.Price) })
+	typeTable(u, fits, buy.Availability(types), cur)
+
 	known := map[string]bool{}
 	for _, t := range types {
 		known[t.Name] = true
@@ -132,7 +151,7 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 	if def == "" {
 		def = "any"
 	}
-	ans, err = a.text("Types in the order to try them:", def, func(s string) error {
+	ans, err = a.text("Types, in order (any = all of these, cheapest first; cx23:6 gives one its own cap):", def, func(s string) error {
 		if strings.EqualFold(s, "any") {
 			return nil
 		}
@@ -154,39 +173,11 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 		p.Types = nil
 	}
 
-	fmt.Fprintln(out, "\nHetzner Backups keep 7 daily copies of the whole server for 20% of its price.")
-	if err := a.question(huh.NewConfirm().Title("Turn on backups?").Value(&p.Backups), func() string {
-		return "Turn on backups? " + map[bool]string{true: "Yes", false: "No"}[p.Backups]
-	}); err != nil {
-		return p, err
-	}
-
-	what := "its IPv4"
-	if p.Backups {
-		what = "its IPv4 and backups"
-	}
-	ans, err = a.text(fmt.Sprintf("Most you'll pay per month for one server with %s, in %s before VAT:", what, currencyOr(prices.Currency)),
-		strconv.FormatFloat(p.MaxPrice, 'f', -1, 64), func(s string) error {
-			if _, ok := parseMoney(s); !ok {
-				return errors.New("a number above 0, please")
-			}
-			return nil
-		})
-	if err != nil {
-		return p, err
-	}
-	p.MaxPrice, _ = parseMoney(ans)
-	names, caps, _ := buy.ParseTypes(p.Types)
-	wants := buy.Wants{Types: names, Caps: caps, Locations: p.Locations, MaxPrice: p.MaxPrice, Backups: p.Backups}
-	if len(wants.Candidates(types, prices.IPv4)) == 0 {
-		fmt.Fprintln(out, "  Nothing on your list costs that little, so `closedvps create` won't find anything. Run setup again with a higher cap.")
-	}
-
 	def = "none"
 	if p.MaxTotal > 0 {
 		def = strconv.FormatFloat(p.MaxTotal, 'f', -1, 64)
 	}
-	ans, err = a.text("Most all your closedvps servers in this Hetzner project may cost together per month, or \"none\":", def, func(s string) error {
+	ans, err = a.text(fmt.Sprintf("Most for all closedvps servers together, %s/mo (none = no limit):", cur), def, func(s string) error {
 		if v, ok := parseMoney(s); strings.EqualFold(s, "none") || (ok && v >= p.MaxPrice) {
 			return nil
 		}
@@ -197,8 +188,7 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 	}
 	p.MaxTotal, _ = parseMoney(ans) // "none" reads as 0, no limit
 
-	fmt.Fprintln(out)
-	if p.User, err = a.text("Linux user name on the server:", p.User, func(s string) error {
+	if p.User, err = a.text("Linux user on the servers:", p.User, func(s string) error {
 		if !cloudinit.ValidUser(s) {
 			return errors.New("lowercase letters, digits, _ and -, starting with a letter, and not a system name like root")
 		}
@@ -210,13 +200,83 @@ func (a *app) setupWizard(ctx context.Context, api *cloud.Client, p prefs) (pref
 	if err := a.setupAlerts(ctx); err != nil {
 		return p, err
 	}
-
-	path, err := savePrefs(p)
-	if err != nil {
+	if err := a.setupTailscale(ctx); err != nil {
 		return p, err
 	}
-	fmt.Fprintf(out, "\nSaved to %s.\n\n", path)
+
+	if _, err := savePrefs(p); err != nil {
+		return p, err
+	}
+	u.ok("Saved. closedvps create uses these from now on; flags change one run.")
 	return p, nil
+}
+
+// setupTailscale offers to save a Tailscale OAuth client, checks it against the policy, and saves it only
+// when it works and the policy has the tag.
+func (a *app) setupTailscale(ctx context.Context) error {
+	u := newUI(a.stderr, false, a.now)
+	u.line("")
+	if id, _, saved := tsCredentials(); saved {
+		const keep, replace, remove = 0, 1, 2
+		choice := keep
+		if err := a.choose("Tailscale OAuth client "+id[:min(len(id), 4)]+"... is saved. Keep it?",
+			[]string{"Keep it", "Replace it", "Remove it, and paste a key each time"}, &choice); err != nil {
+			return err
+		}
+		switch choice {
+		case keep:
+			return nil
+		case remove:
+			if _, err := tsClientStore.forget(); err != nil {
+				return err
+			}
+			u.ok("Removed the Tailscale OAuth client")
+			return nil
+		}
+	} else if !a.yesNo("Save a Tailscale OAuth client? (recommended if you buy often)", false) {
+		return nil
+	}
+	u.hint("With it, closedvps makes a one-off key per server and checks your policy before buying.")
+	u.hint("If it leaked, it could add tagged devices and read your policy and device list,")
+	u.hint("but not reach your devices or change the policy.")
+	u.hint("1. Paste the blocks from closedvps.com/tailscale into Access controls")
+	u.hint("2. console.tailscale.com/admin/settings/trust-credentials > Credential > OAuth")
+	u.hint("   Scopes: Auth Keys (write, tag:closedvps), Policy File (read), Devices (read)")
+	id, err := a.text("Client ID:", "", func(s string) error { return nil })
+	if err != nil {
+		return err
+	}
+	if id == "" {
+		return fail("usage", "No client ID", "Run closedvps setup again to add one.")
+	}
+	secret, err := a.askSecret("Client secret:")
+	if err != nil {
+		return fail("usage", "No client secret: "+err.Error())
+	}
+	ts, err := tsapi.New(id, secret, a.tsBase, "closedvps/"+currentVersion())
+	if err != nil {
+		return err
+	}
+	policy, err := ts.CheckPolicy(ctx)
+	switch {
+	case err != nil && tsapi.Refused(err):
+		return fail("bad_token", "Tailscale rejected that client",
+			"Check it has the three scopes above, then run closedvps setup again. Nothing else changed.")
+	case err != nil:
+		return fail("failed", "Couldn't read your Tailscale policy: "+tsapi.Describe(err))
+	case policy == tsapi.PolicyNoTag:
+		return fail("no_tag", "Your Tailscale policy doesn't define tag:closedvps",
+			"Add the blocks from closedvps.com/tailscale, then run closedvps setup again.")
+	case policy == tsapi.PolicyOpen:
+		u.warn("Your Tailscale policy lets tag:closedvps reach your devices")
+		u.hint("closedvps.com/tailscale shows the rule that stops it.")
+	default:
+		u.ok("tag:closedvps exists and can't reach your devices")
+	}
+	if _, err := tsClientStore.save(id + "\n" + secret); err != nil {
+		return err
+	}
+	return nil
 }
 
 // parseMoney reads an amount, with a comma or a dot for the decimals.
@@ -228,9 +288,7 @@ func parseMoney(s string) (float64, bool) {
 // setupAlerts asks where remote alerts go, saves the links as a secret and sends a test message. Only
 // "None" deletes saved links; a step that fails leaves them as they were.
 func (a *app) setupAlerts(ctx context.Context) error {
-	out := a.stderr
-	fmt.Fprintln(out, "\nWaiting for stock can take hours. This computer shows a notification when a server is bought and")
-	fmt.Fprintln(out, "when it's ready. Messages name the server, type and price; the \"ready\" one comes from the new server.")
+	u := newUI(a.stderr, false, a.now)
 	const keep, ntfy, telegram, links, none = "keep", "ntfy", "telegram", "links", "none"
 	var opts []huh.Option[string]
 	choice := none
@@ -248,10 +306,10 @@ func (a *app) setupAlerts(ctx context.Context) error {
 		huh.NewOption("Links: Discord or Slack webhooks, ntfy topics, any https webhook", links),
 		huh.NewOption("None, this computer only", none),
 	)
-	const title = "Send alerts to your phone or a chat too?"
+	const title = "Send alerts to your phone or a chat? (a wait for stock can take days)"
 	if err := a.question(huh.NewSelect[string]().Title(title).Options(opts...).Value(&choice), func() string {
 		i := slices.IndexFunc(opts, func(o huh.Option[string]) bool { return o.Value == choice })
-		return title + " " + opts[i].Key
+		return cyan.Render("?") + " " + title + " " + opts[i].Key
 	}); err != nil {
 		return err
 	}
@@ -287,29 +345,32 @@ func (a *app) setupAlerts(ctx context.Context) error {
 	if len(parsed) == 0 {
 		return errors.New("no alert links given; the saved ones are unchanged")
 	}
-	where, err := linksStore.save(link)
-	if err != nil {
+	if _, err := linksStore.save(link); err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "  Saved in %s.\n", where)
 	if tip != "" {
-		fmt.Fprintln(out, " ", tip)
+		u.hint("%s", tip)
 		if err := a.question(huh.NewInput().Title("Press Enter once you've subscribed, for a test message."), nil); err != nil {
 			return err
 		}
 	}
 	errs := alert.Send(ctx, a.http, parsed, alert.Message{Title: "closedvps test alert", Text: "Alerts from closedvps will arrive here."})
 	for _, e := range errs {
-		fmt.Fprintf(out, "  Test message failed for %v\n", e)
+		u.warn("The test alert failed for %v", e)
 	}
 	if len(errs) < len(parsed) {
-		fmt.Fprintln(out, "  Sent a test message. If it didn't arrive, run `closedvps setup` again.")
+		var names []string
+		for _, l := range parsed {
+			names = append(names, l.Name())
+		}
+		u.ok("Sent a test alert to %s", strings.Join(names, ", "))
+		u.hint("If it didn't arrive, run closedvps setup again.")
 	}
 	return nil
 }
 
 func (a *app) connectTelegram(ctx context.Context) (string, error) {
-	fmt.Fprintln(a.stderr, "  In Telegram, message @BotFather with /newbot and copy the token it gives you.")
+	newUI(a.stderr, false, a.now).hint("In Telegram, message @BotFather with /newbot and copy the token it gives you.")
 	var token string
 	in := huh.NewInput().Title("Bot token:").EchoMode(huh.EchoModePassword).Value(&token).Validate(func(s string) error {
 		if strings.TrimSpace(s) == "" {
@@ -362,20 +423,21 @@ func currencyOr(c string) string {
 func newForgetCmd(a *app) *cobra.Command {
 	return &cobra.Command{
 		Use:   "forget",
-		Short: "Delete the saved Hetzner token and alert links from this computer",
-		Long: `Deletes the saved Hetzner token and alert links from this computer. Revoke the token in the Hetzner
-Console too if you're done with it.`,
+		Short: "Delete the saved Hetzner token, alert links and Tailscale OAuth client from this computer",
+		Long: `Deletes the saved Hetzner token, alert links and Tailscale OAuth client from this computer. Revoke the
+token in the Hetzner Console and the client in Tailscale's admin console too if you're done with them.`,
 		Args: cobra.NoArgs,
 		RunE: func(*cobra.Command, []string) error {
-			for _, s := range []store{tokenStore, linksStore} {
+			u := newUI(a.stdout, false, a.now)
+			for _, s := range []store{tokenStore, linksStore, tsClientStore} {
 				removed, err := s.forget()
 				if err != nil {
 					return err
 				}
 				if removed {
-					fmt.Fprintf(a.stdout, "Deleted the saved %s.\n", s.what)
+					u.ok("Deleted the saved %s", s.what)
 				} else {
-					fmt.Fprintf(a.stdout, "No saved %s on this computer.\n", s.what)
+					u.info("No saved %s on this computer", s.what)
 				}
 			}
 			return nil

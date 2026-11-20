@@ -28,6 +28,10 @@ func FirewallName(server string) string { return "closedvps-" + server }
 
 func IsManaged(s *hcloud.Server) bool { return s != nil && s.Labels[ManagedLabel] == ManagedValue }
 
+func IsManagedFirewall(fw *hcloud.Firewall) bool {
+	return fw != nil && fw.Labels[ManagedLabel] == ManagedValue
+}
+
 type Client struct{ *hcloud.Client }
 
 // New makes a client. endpoint and hc may be empty and nil for the real API; extra options go last, so
@@ -65,8 +69,9 @@ func IsCode(err error, codes ...string) bool {
 
 // Prices are the account's currency and the monthly IPv4 price per location, before VAT.
 type Prices struct {
-	Currency string
-	IPv4     map[string]float64
+	Currency   string
+	IPv4       map[string]float64
+	SnapshotGB float64 // per GB per month
 }
 
 // Prices reads the IPv4 prices. hcloud-go v2.53.0 panics on a pricing reply with more primary IP types than
@@ -82,6 +87,7 @@ func (c *Client) Prices(ctx context.Context) (_ Prices, err error) {
 		return Prices{}, err
 	}
 	out := Prices{Currency: p.Currency, IPv4: map[string]float64{}}
+	out.SnapshotGB, _ = strconv.ParseFloat(p.Image.PerGBMonth.Net, 64)
 	for _, ip := range p.PrimaryIPs {
 		if ip.Type != "ipv4" {
 			continue
@@ -326,4 +332,61 @@ func IPv4(s *hcloud.Server) string {
 		return ""
 	}
 	return s.PublicNet.IPv4.IP.String()
+}
+
+// Inbound is every rule that lets traffic in to a server, from all its firewalls. firewalls is how many are on it.
+func (c *Client) Inbound(ctx context.Context, s *hcloud.Server) (rules []hcloud.FirewallRule, firewalls int, err error) {
+	for _, ref := range s.PublicNet.Firewalls {
+		fw, _, err := c.Firewall.GetByID(ctx, ref.Firewall.ID)
+		if err != nil {
+			return nil, 0, err
+		}
+		if fw != nil {
+			firewalls++
+			rules = append(rules, InboundRules(fw)...)
+		}
+	}
+	return rules, firewalls, nil
+}
+
+// Leftovers are closedvps firewalls with no server: from a run that stopped, or a server deleted in the Console.
+func (c *Client) Leftovers(ctx context.Context) ([]*hcloud.Firewall, error) {
+	fws, err := c.Firewall.AllWithOpts(ctx, hcloud.FirewallListOpts{ListOpts: hcloud.ListOpts{LabelSelector: ManagedLabel + "=" + ManagedValue}})
+	if err != nil {
+		return nil, err
+	}
+	var out []*hcloud.Firewall
+	for _, fw := range fws {
+		if len(fw.AppliedTo) == 0 && strings.HasPrefix(fw.Name, "closedvps-") {
+			out = append(out, fw)
+		}
+	}
+	return out, nil
+}
+
+// Snapshots are the snapshots made from a server, which Hetzner keeps, and bills, after the server goes.
+func (c *Client) Snapshots(ctx context.Context, serverID int64) ([]*hcloud.Image, error) {
+	imgs, err := c.Image.AllWithOpts(ctx, hcloud.ImageListOpts{Type: []hcloud.ImageType{hcloud.ImageTypeSnapshot}})
+	if err != nil {
+		return nil, err
+	}
+	var out []*hcloud.Image
+	for _, i := range imgs {
+		if i.CreatedFrom != nil && i.CreatedFrom.ID == serverID {
+			out = append(out, i)
+		}
+	}
+	return out, nil
+}
+
+// DeleteServer deletes a server and waits until it's gone.
+func (c *Client) DeleteServer(ctx context.Context, s *hcloud.Server) error {
+	res, _, err := c.Server.DeleteWithResult(ctx, s)
+	if err != nil {
+		return err
+	}
+	if res != nil && res.Action != nil {
+		return c.Wait(ctx, res.Action)
+	}
+	return nil
 }

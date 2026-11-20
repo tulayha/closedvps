@@ -13,7 +13,7 @@ import (
 )
 
 // eventKinds are the values of event.Event, in the order a run can produce them.
-var eventKinds = []string{"plan", "waiting", "bought", "ready", "unreachable", "stopped"}
+var eventKinds = []string{"plan", "waiting", "bought", "ready", "unreachable", "stopped", "deleted"}
 
 // event is one step of a create run, printed as a JSON line with --json. Bought and Count are pointers so a
 // 0 still shows where it means something.
@@ -32,7 +32,22 @@ type event struct {
 	Bought     *int            `json:"bought,omitempty"`
 	Count      *int            `json:"count,omitempty"`
 	Reason     string          `json:"reason,omitempty"`
-	Candidates []buy.Candidate `json:"candidates,omitempty"`
+	Code       string          `json:"code,omitempty"`      // stopped: why, one of the stop codes in the skill
+	Billing    []string        `json:"billing,omitempty"`   // stopped: servers bought, which are running and billing
+	DryRun     bool            `json:"dry_run,omitempty"`   // plan
+	Servers    []string        `json:"servers,omitempty"`   // plan: the names it will buy
+	Setup      []string        `json:"setup,omitempty"`     // plan: what first boot sets up
+	Tailscale  string          `json:"tailscale,omitempty"` // plan: key, checked or open
+	Firewall   string          `json:"firewall,omitempty"`  // deleted
+	Tagged     *bool           `json:"tagged,omitempty"`    // ready
+	Next       []string        `json:"next,omitempty"`      // ready: the commands to run now
+	Candidates []planCandidate `json:"candidates,omitempty"`
+}
+
+// planCandidate is a candidate in the plan, with whether Hetzner lists it in stock right now.
+type planCandidate struct {
+	buy.Candidate
+	InStock bool `json:"in_stock"`
 }
 
 func num(n int) *int { return &n }

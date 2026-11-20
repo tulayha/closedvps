@@ -6,10 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -31,13 +33,24 @@ func main() {
 	err := run(ctx, newApp(), os.Args[1:])
 	stop()
 	code := exitCode(err)
-	switch {
-	case code == exitStopped:
-		fmt.Fprintln(os.Stderr, "\nStopped.")
-	case code != exitOK:
-		fmt.Fprintln(os.Stderr, "closedvps:", err)
-	}
+	printError(os.Stderr, err, code)
 	os.Exit(code)
+}
+
+// printError writes the error that ended a command, unless the command already wrote it: what went wrong,
+// then what to do about it.
+func printError(w io.Writer, err error, code int) {
+	var f *failure
+	switch {
+	case code == exitOK:
+	case errors.As(err, &f) && f.shown:
+	case f != nil:
+		newUI(w, false, time.Now).report(f)
+	case code == exitStopped:
+		fmt.Fprintln(w, "\n- Stopped")
+	default:
+		newUI(w, false, time.Now).fail("%s", upperFirst(err.Error()))
+	}
 }
 
 // usageError is a mistake in how closedvps was called.
@@ -96,7 +109,7 @@ func newRoot(a *app) *cobra.Command {
 	root.SetOut(a.stdout)
 	root.SetErr(a.stderr)
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error { return usageError{err} })
-	root.AddCommand(newCreateCmd(a), newSetupCmd(a), newTypesCmd(a), newListCmd(a),
+	root.AddCommand(newCreateCmd(a), newSetupCmd(a), newTypesCmd(a), newListCmd(a), newDeleteCmd(a),
 		newOpenSSHCmd(a), newCloseSSHCmd(a), newForgetCmd(a), newUpgradeCmd(a), &cobra.Command{
 			Use:   "version",
 			Short: "Print the version",

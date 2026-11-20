@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -64,7 +65,33 @@ func defaultPublicKey() (string, error) {
 			return p, nil
 		}
 	}
-	return "", errors.New("no SSH key found in ~/.ssh; make one with: ssh-keygen -t ed25519 (or pass --ssh-key)")
+	return "", errNoKey
+}
+
+var errNoKey = errors.New("no SSH key in ~/.ssh; make one with ssh-keygen -t ed25519, or pass --ssh-key")
+
+// sshKeygen runs ssh-keygen at the terminal, which asks for the passphrase itself.
+func sshKeygen() error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Join(home, ".ssh"), 0o700); err != nil {
+		return err
+	}
+	cmd := exec.Command("ssh-keygen", "-t", "ed25519", "-f", filepath.Join(home, ".ssh", "id_ed25519"))
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stderr, os.Stderr
+	return cmd.Run()
+}
+
+// shortPath writes a path under the home folder with ~.
+func shortPath(p string) string {
+	if home, err := os.UserHomeDir(); err == nil {
+		if rest, ok := strings.CutPrefix(p, home+string(filepath.Separator)); ok {
+			return "~/" + filepath.ToSlash(rest)
+		}
+	}
+	return p
 }
 
 // defaultUser is the local login name when it works as a Linux user name, so `ssh <server>` just works.

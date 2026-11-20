@@ -23,37 +23,38 @@ irm https://closedvps.com/install.ps1 | iex         # Windows
 closedvps create
 ```
 
-The first run asks for a few things and remembers them:
+The first run asks three things: your Hetzner API token (Hetzner Console, your project, Security, API tokens,
+**Read & Write**), which it offers to keep in your system's password store; what the server is for (just a
+server, Claude Code, Codex, or both); and, once you've seen the plan and said yes, a Tailscale auth key
+(login.tailscale.com/admin/settings/keys, one-off). Everything else is a default it shows in the plan: the
+first type Hetzner sells you in nbg1, fsn1 or hel1 for up to 10 a month, no backups, and your local user
+name. A few minutes after the purchase it prints the command to log in, `ssh you@vps`.
 
-- your Hetzner API token (Hetzner Console, your project, Security, API tokens, **Read & Write**), which it
-  offers to keep in your system's password store;
-- which locations and server types to try and in what order, shown with live prices and stock;
-- the most you'll pay per month per server and for all of them together, and whether to turn on Hetzner
-  Backups (off unless you say yes);
-- your user name on the server, and where alerts go besides this computer.
+The server asks for the tag `tag:closedvps` itself, which works once your tailnet policy has the two changes
+in [Tailscale access](#tailscale-access). Until then it joins untagged, and ClosedVPS says how to fix that.
 
-Every run then asks for a Tailscale auth key (login.tailscale.com/admin/settings/keys). Make it one-off,
-since it's spent once the server joins, or reusable with an expiry of a day when you buy several at once, and
-pre-approved if your tailnet asks you to approve new devices. Give it the tag `tag:closedvps` once your
-tailnet policy has the two changes in [Tailscale access](#tailscale-access). ClosedVPS
-shows what it would buy and asks before spending anything. A few minutes after the purchase it prints
-`Ready: ssh you@vps`.
+It also needs an SSH key on your computer (it offers to run `ssh-keygen` when there's none) and Tailscale
+running there, so you can reach the server.
 
-It also needs an SSH key on your computer (`ssh-keygen -t ed25519` makes one) and Tailscale running there,
-so you can reach the server.
+`closedvps setup` saves your own answers: what servers are for, locations, types, price caps, backups, your
+user name and alerts. Its last step is optional and worth it if you buy often: a Tailscale OAuth client, so
+ClosedVPS makes a one-off key for each server itself and checks your policy before buying.
 
 ```sh
-closedvps setup                                   # change the saved answers
+closedvps setup                                   # save your defaults
 closedvps types                                   # stock and prices, buys nothing
-closedvps create --dry-run                        # the plan and the exact first-boot setup, buys nothing
+closedvps create -n --show-setup                  # the plan and the exact first-boot setup, buys nothing
 closedvps create --name web --claude              # another server, with Claude Code on it
 closedvps create --name agents --claude --codex   # with Claude Code and Codex
 closedvps create --count 10 --type cx23:6         # ten servers at up to 6 a month each
 CLOUDFLARE_TUNNEL_TOKEN=... closedvps create      # with a Cloudflare Tunnel for public sites
+closedvps list                                    # what you have, what it costs, what can reach it
+closedvps delete vps                              # gone, with its firewall
 ```
 
 Any saved answer can be overridden for one run with a flag (`--location`, `--type`, `--max-price`,
-`--max-total`, `--backups`); `closedvps create --help` lists them.
+`--max-total`, `--backups`, `--claude`, `--codex`); `closedvps create --help` lists them. Claude Code and
+Codex need 4 GB, so with either ClosedVPS only buys types with 4 GB or more.
 
 `closedvps upgrade` replaces it with the newest release, checked against the release's checksums the way the
 install scripts check it. Once a day at most, a command you run in a terminal asks closedvps.com whether a
@@ -70,8 +71,8 @@ Hetzner project together, counting the ones already there, and it's checked befo
 read again on every check, so a price rise while it waits can't push a purchase over a cap.
 
 `--count 10` buys ten servers named vps-1 to vps-10, each with its own firewall. Each check it buys as many as
-are in stock and keeps waiting for the rest. The Tailscale key has to be reusable, or only the first server
-joins your tailnet. Hetzner limits how many servers an account can have; reaching that stops the run, and the
+are in stock and keeps waiting for the rest. A pasted Tailscale key has to be reusable, or only the first
+server joins your tailnet; with a saved OAuth client each server gets its own one-off key. Hetzner limits how many servers an account can have; reaching that stops the run, and the
 servers already bought stay.
 
 ## Waiting for stock
@@ -112,15 +113,18 @@ ClosedVPS has no Tailscale.
 as `CLOSEDVPS_SSH_KEY` where there's no key file.
 
 ```sh
-docker run -d --name closedvps \
-  -e HCLOUD_TOKEN -e TS_AUTHKEY -e CLOSEDVPS_NOTIFY -e CLOSEDVPS_SSH_KEY="$(cat ~/.ssh/id_ed25519.pub)" \
+docker run -d --restart on-failure:3 --name closedvps \
+  -e HCLOUD_TOKEN -e TS_OAUTH_CLIENT_ID -e TS_OAUTH_CLIENT_SECRET -e CLOSEDVPS_NOTIFY \
+  -e CLOSEDVPS_SSH_KEY="$(cat ~/.ssh/id_ed25519.pub)" \
   ghcr.io/tulayha/closedvps create --yes --user you --type cx23:6
 docker logs -f closedvps
 ```
 
-Leave out `--restart`: a restart after a purchase would only find the server name taken. On a Linux machine
-without Docker, `systemd-run` keeps it going in the background (with `loginctl enable-linger` it also outlives
-your login):
+A wait can take days, which a pasted `TS_AUTHKEY` may not outlast, so an OAuth client (as above, or saved
+with `closedvps setup` where the machine has a password store) is the better fit here: the key is made at the
+moment of buying. Without a terminal a taken name stops the run, so a restart after a purchase can't buy a
+second server. On a Linux machine without Docker, `systemd-run` keeps it going in the background (with
+`loginctl enable-linger` it also outlives your login):
 
 ```sh
 systemd-run --user --unit=closedvps -E HCLOUD_TOKEN -E TS_AUTHKEY closedvps create --yes --type cx23:6
@@ -173,15 +177,18 @@ These stay as they are, and you should know them:
 
 - The Hetzner token can do anything in its project. ClosedVPS sends it only to `api.hetzner.cloud`. If you let
   it save the token, it goes in the macOS Keychain, Windows Credential Manager or the Linux Secret Service, or
-  where none exists, a file only you can read in the ClosedVPS config folder. `closedvps forget` deletes it and the alert links.
+  where none exists, a file only you can read in the ClosedVPS config folder. `closedvps forget` deletes it,
+  the alert links and the Tailscale OAuth client.
   A separate Hetzner project for these servers keeps the token away from anything else.
 - The Tailscale auth key, the tunnel token and the alert links reach the server in its cloud-init data.
   Hetzner keeps that for the server's life in its metadata service, which only root on the server can reach.
   A one-off auth key is spent once the server joins; a reusable one for `--count` should expire within a day.
   cloudflared needs the tunnel token on the server anyway.
-- A server that joins with an untagged key can open connections to every device on your tailnet and drops
-  off it after 180 days. [Tailscale access](#tailscale-access) fixes both, and ClosedVPS warns when a new
-  server has no tag.
+- A server that joins untagged can open connections to every device on your tailnet and drops off it after
+  180 days. Each server asks for `tag:closedvps`, which your policy allows once it has the changes in
+  [Tailscale access](#tailscale-access), and ClosedVPS warns when a new server has no tag.
+- A saved Tailscale OAuth client can make tagged keys and read your policy and device list. It can't reach
+  your devices or change the policy. It's kept like the Hetzner token.
 - Outbound traffic is allowed, and your user has passwordless sudo, as on most cloud images.
 - Alert links can post to your chat, so they're kept like the token. Each server sends its own "ready" alert
   with them and then deletes its copy, though root can still read them from the metadata service. Alerts
@@ -204,8 +211,8 @@ devices able to reach the servers and stop the servers from opening connections 
 ],
 ```
 
-Then generate auth keys with the tag `tag:closedvps`. Replies to your connections still get through, and
-tagged devices skip key expiry. An older tailnet whose policy has `acls` in place of `grants` changes the
+Each server asks for `tag:closedvps` when it joins, so a plain one-off key is enough. Replies to your
+connections still get through, and tagged devices skip key expiry. An older tailnet whose policy has `acls` in place of `grants` changes the
 `src` of its allow-everything rule the same way. A server that's already running gets the tag from the Machines page, its menu, Edit tags.
 [closedvps.com/tailscale](https://closedvps.com/tailscale) explains each step.
 
@@ -226,15 +233,18 @@ tab can boot a rescue system with your SSH key; run `closedvps open-ssh` first s
 
 ## Servers you already have
 
-`closedvps list` shows every server in the Hetzner project, made by ClosedVPS or not, and marks each one
-`closed` or `OPEN` with what lets traffic in. A server with no firewall takes connections on every port it
+`closedvps list` shows every server in the Hetzner project, made by ClosedVPS or not, with its price, whether
+the internet can reach it and what's let in, and whether it's on your tailnet. `--json` adds the firewall
+rules. A server with no firewall takes connections on every port it
 listens on, Docker's published ports included. [Closing one by hand](https://closedvps.com/guide#close-a-server-you-already-have)
 puts Tailscale on it before the firewall goes on, so you never lose your way in.
 
 ## Removing a server
 
-Delete the server in the Hetzner Console, then its `closedvps-<name>` firewall, and remove the machine from
-your Tailscale admin.
+`closedvps delete vps` deletes the server, its disk and backups, and its `closedvps-vps` firewall, after you
+type its name. It only deletes servers ClosedVPS made, and it says when snapshots are left, since Hetzner keeps
+billing those. Remove the machine from your Tailscale admin too. A firewall left from a stopped run goes the
+same way: `closedvps list` names it, and `closedvps delete <name>` removes it.
 
 ## For coding agents
 
