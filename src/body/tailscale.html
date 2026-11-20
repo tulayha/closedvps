@@ -1,0 +1,62 @@
+<div class="docgrid">
+<main class="doc">
+  <h1>Tag your VPS so it can't reach your laptop over Tailscale</h1>
+  <p>A new tailnet lets every device reach every other one. Put a VPS on it and the VPS can open connections to
+    your laptop, your phone and your NAS, while a server running Claude Code installs packages and runs code you
+    haven't read. Two changes to the tailnet policy and a tagged auth key let your devices reach the server and stop
+    the server from starting connections to them. <a href="/">ClosedVPS</a> asks for that key and warns when a new
+    server joins without the tag.</p>
+
+  <h2 id="why-a-vps-can-reach-your-laptop">Why a VPS can reach your laptop</h2>
+  <p>Tailscale starts every tailnet with a policy that allows everything:</p>
+  <blockquote><p>Lets all devices in the tailnet access all other devices in the tailnet.</p>
+    <cite><a href="https://tailscale.com/kb/1192/acl-samples">Tailscale docs, policy samples</a></cite></blockquote>
+  <p>That suits your own laptop and phone. A VPS pulls packages and downloads from the internet all day, and if
+    something on it is taken over, the tailnet is a way into your other machines that no firewall in front of the
+    server can stop.</p>
+
+  <h2 id="change-the-policy">Change the policy</h2>
+  <p>Open <a href="https://login.tailscale.com/admin/acls">Access controls</a> in the Tailscale admin console, add
+    the tag, and change who may start connections from everyone to the people in your tailnet:</p>
+  <pre class="term"><code>"tagOwners": { "tag:closedvps": ["autogroup:admin"] },
+"acls": [
+  // was "src": ["*"]
+  { "action": "accept", "src": ["autogroup:member"], "dst": ["*:*"] },
+],</code></pre>
+  <p>A tagged device belongs to its tag instead of a person, so <code>autogroup:member</code> leaves it out. If
+    your file has a <code>grants</code> section in place of <code>acls</code>, change the allow-everything grant the
+    same way, to <code>"src": ["autogroup:member"]</code>. The <code>ssh</code> section stays as it is. If you
+    already tag other devices, such as a home server, they lose the right to start connections too, so give them
+    their own rule.</p>
+
+  <h2 id="make-a-tagged-auth-key">Make a tagged auth key</h2>
+  <p>In <a href="https://login.tailscale.com/admin/settings/keys">Settings, Keys</a>, choose Generate auth key, turn
+    on Pre-approved and Tags, and pick <code>tag:closedvps</code>. Leave Reusable off for one server. For several
+    at once with <code>--count</code>, turn it on and let the key expire within a day. A device that joins with
+    the key gets its tag:</p>
+  <blockquote><p>After a device logs in as the user who generated the auth key, the device assumes the identity of the auth key's tags.</p>
+    <cite><a href="https://tailscale.com/kb/1085/auth-keys">Tailscale docs, auth keys</a></cite></blockquote>
+  <p>Paste it when <code>closedvps create</code> asks, or set it as <code>TS_AUTHKEY</code>. Setting a server up
+    by hand, use it in the <a href="/guide">guide's</a> <code>tailscale up</code> line.</p>
+
+  <h2 id="tag-a-server-that-s-already-running">Tag a server that's already running</h2>
+  <p>On the <a href="https://login.tailscale.com/admin/machines">Machines</a> page, open the menu at the end of the
+    server's row, choose Edit tags, add <code>tag:closedvps</code> and save. Only an Owner, Admin or Network admin
+    can do this, and the tag has to be in the policy first (<a href="https://tailscale.com/kb/1068/tags">Tailscale
+    docs, tags</a>).</p>
+
+  <h2 id="what-changes">What changes</h2>
+  <p>Your devices still reach the server, and its answers still get back to them. Only new connections from the
+    server are blocked:</p>
+  <blockquote><p>A grant is necessary to open a new connection, but not to reply to one.</p>
+    <cite><a href="https://tailscale.com/docs/features/access-control/grants/grants-explained">Tailscale docs, grants explained</a></cite></blockquote>
+  <p>The server also stays on your tailnet for good, since tagged devices skip the 180-day key expiry:</p>
+  <blockquote><p>Key expiry for tagged devices is disabled by default.</p>
+    <cite><a href="https://tailscale.com/kb/1085/auth-keys">Tailscale docs, auth keys</a></cite></blockquote>
+  <p>It no longer belongs to your Tailscale user, which only matters if you use Tailscale SSH from it to your own
+    devices. ClosedVPS servers use ordinary SSH that you start from your laptop, which the rule above allows. Two
+    tagged servers can't reach each other either, until you add a rule from <code>tag:closedvps</code> to
+    <code>tag:closedvps</code>.</p>
+</main>
+<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#why-a-vps-can-reach-your-laptop">Why a VPS can reach your laptop</a><a href="#change-the-policy">Change the policy</a><a href="#make-a-tagged-auth-key">Make a tagged auth key</a><a href="#tag-a-server-that-s-already-running">Tag a server that's already running</a><a href="#what-changes">What changes</a></nav>
+</div>

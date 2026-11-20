@@ -1,0 +1,8 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { dated } from "../site.js";
+import body from "../body/tailscale.html?raw";
+---
+<Layout path="/tailscale">
+<Fragment set:html={dated("/tailscale", body)} />
+</Layout>

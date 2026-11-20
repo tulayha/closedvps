@@ -42,6 +42,8 @@
   <blockquote><p>While BOD 23-02 strictly applies to FCEB agencies, this threat extends to every sector. CISA recommends
     all stakeholders review and adopt this guidance.</p>
     <cite><a href="https://www.cisa.gov/news-events/alerts/2023/06/13/cisa-issues-bod-23-02-mitigating-risk-internet-exposed-management-interfaces">CISA alert, 13 June 2023</a></cite></blockquote>
+  <p>Inside your tailnet the server carries a tag, so your devices can reach it but it can't open connections to
+    them. <a href="/tailscale">Tailscale for a VPS</a> has the policy change.</p>
 
   <h2 id="no-root-login-no-passwords">No root login, no passwords</h2>
   <p>Root can't log in over SSH, and only the user ClosedVPS creates can (<code>AllowUsers</code>). Those are rules

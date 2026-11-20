@@ -39,6 +39,17 @@ export const pages = [
     modified: "2026-11-20",
   },
   {
+    path: "/tailscale",
+    type: "TechArticle",
+    title: "Tailscale ACL for a VPS: tag it so it can't reach your laptop",
+    name: "Tailscale for a VPS",
+    description:
+      "A new tailnet lets every device reach every other one. Tag your VPS and change one rule so your devices reach it and it can't open connections back.",
+    llms: "the tailnet policy change (tagOwners and src autogroup:member), a tagged auth key, tagging a running server, and what changes",
+    published: "2026-11-20",
+    modified: "2026-11-20",
+  },
+  {
     path: "/claude-code",
     type: "TechArticle",
     title: "Run Claude Code on a Hetzner VPS with no open ports",
