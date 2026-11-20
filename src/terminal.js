@@ -9,7 +9,9 @@ const get = async (url) => {
 };
 
 export async function terminal() {
-  const tag = process.env.CLOSEDVPS_REF ?? (await (await get(`https://api.github.com/repos/${repo}/releases/latest`)).json()).tag_name;
+  // github.com/<repo>/releases/latest redirects to .../releases/tag/<tag>. GitHub's API would say the same, but it
+  // rate-limits Cloudflare's shared build machines.
+  const tag = process.env.CLOSEDVPS_REF ?? (await get(`https://github.com/${repo}/releases/latest`)).url.split("/").pop();
   const run = (await (await get(`https://raw.githubusercontent.com/${repo}/${tag}/testdata/example-run.txt`)).text()).trimEnd().split("\n");
 
   const span = (cls) => (t) => `<span class="${cls}">${t}</span>`;
