@@ -122,7 +122,7 @@ write_files:
 
       [Install]
       WantedBy=multi-user.target
-  # Ubuntu 24.04 blocks unprivileged user namespaces, which Claude Code's sandbox (bubblewrap) needs.
+  # Ubuntu 24.04 blocks unprivileged user namespaces, which the Claude Code and Codex sandboxes (bubblewrap) need.
   - path: /etc/apparmor.d/bwrap
     content: |
       abi <abi/4.0>,
@@ -141,6 +141,7 @@ runcmd:
   - apt-get update && apt-get install -y cloudflared && systemctl daemon-reload && systemctl enable --now cloudflared
   - systemctl reload apparmor
   - su - dev -c 'curl -fsSL --retry 5 https://claude.ai/install.sh -o /tmp/claude-install.sh && bash /tmp/claude-install.sh && rm /tmp/claude-install.sh'
+  - su - dev -c 'curl -fsSL --retry 5 https://chatgpt.com/codex/install.sh -o /tmp/codex-install.sh && CODEX_NON_INTERACTIVE=1 sh /tmp/codex-install.sh && rm /tmp/codex-install.sh'
   - curl -fsSL --retry 5 https://tailscale.com/install.sh -o /tmp/tailscale-install.sh && sh /tmp/tailscale-install.sh && rm /tmp/tailscale-install.sh
   - systemctl daemon-reload && systemctl enable closedvps-join.service
   # With a kernel update pending, the reboot below starts the join; otherwise join now.

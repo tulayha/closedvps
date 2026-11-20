@@ -19,15 +19,15 @@ import (
 )
 
 type createOpts struct {
-	name, user, sshKey, image string
-	types, locations, notify  string
-	maxPrice, maxTotal        float64
-	count                     int
-	interval                  time.Duration
-	backups                   bool
-	claude, dryRun, yes       bool
-	noWait, json              bool
-	changed                   func(flag string) bool
+	name, user, sshKey, image  string
+	types, locations, notify   string
+	maxPrice, maxTotal         float64
+	count                      int
+	interval                   time.Duration
+	backups                    bool
+	claude, codex, dryRun, yes bool
+	noWait, json               bool
+	changed                    func(flag string) bool
 }
 
 // billingError is a run that bought at least one server but didn't finish: those servers are running and billing.
@@ -37,7 +37,7 @@ func (e billingError) Error() string { return e.err.Error() }
 func (e billingError) Unwrap() error { return e.err }
 
 const createLong = `Buys Hetzner Cloud servers behind a firewall with no inbound rules and sets them up on first boot:
-Tailscale for SSH, automatic security updates, and optionally Cloudflare Tunnel and Claude Code. If nothing on
+Tailscale for SSH, automatic security updates, and optionally Cloudflare Tunnel, Claude Code and Codex. If nothing on
 your list can be bought, it tries again until something can or you press Ctrl+C.
 
 The first run in a terminal asks for your preferences (closedvps setup) and saves them; the options below
@@ -94,6 +94,7 @@ func newCreateCmd(a *app) *cobra.Command {
 	f.StringVar(&o.image, "image", "ubuntu-24.04", "Hetzner image")
 	f.DurationVar(&o.interval, "every", time.Minute, "how long to wait between tries when nothing can be bought")
 	f.BoolVar(&o.claude, "claude", false, "also install Claude Code (you log in on the server afterwards)")
+	f.BoolVar(&o.codex, "codex", false, "also install OpenAI's Codex CLI (you log in on the server afterwards)")
 	f.BoolVar(&o.dryRun, "dry-run", false, "show what would be bought and print the first-boot setup, without buying")
 	f.BoolVar(&o.yes, "yes", false, "don't ask before buying")
 	f.BoolVar(&o.noWait, "no-wait", false, "return once the servers are bought, without waiting for them to join your tailnet")
@@ -265,7 +266,7 @@ func (r *createRun) options(ctx context.Context, p prefs, saved bool) error {
 
 // render makes each server's first-boot setup. Validation happens here, before anything is bought.
 func (r *createRun) render() error {
-	base := cloudinit.Config{Version: currentVersion(), User: r.o.user, SSHPublicKey: r.key.line, Claude: r.o.claude}
+	base := cloudinit.Config{Version: currentVersion(), User: r.o.user, SSHPublicKey: r.key.line, Claude: r.o.claude, Codex: r.o.codex}
 	if r.o.dryRun {
 		base.TailscaleKey = "tskey-auth-dry-run"
 		if os.Getenv("CLOUDFLARE_TUNNEL_TOKEN") != "" {
@@ -358,6 +359,9 @@ func (r *createRun) plan(ctx context.Context) error {
 	}
 	if r.o.claude {
 		extras = append(extras, "Claude Code")
+	}
+	if r.o.codex {
+		extras = append(extras, "Codex")
 	}
 	fmt.Fprintf(r.log, "Setup    %s on %s\n", strings.Join(extras, ", "), r.o.image)
 	if r.o.backups {

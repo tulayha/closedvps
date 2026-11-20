@@ -47,6 +47,7 @@ closedvps setup                                   # change the saved answers
 closedvps types                                   # stock and prices, buys nothing
 closedvps create --dry-run                        # the plan and the exact first-boot setup, buys nothing
 closedvps create --name web --claude              # another server, with Claude Code on it
+closedvps create --name agents --claude --codex   # with Claude Code and Codex
 closedvps create --count 10 --type cx23:6         # ten servers at up to 6 a month each
 CLOUDFLARE_TUNNEL_TOKEN=... closedvps create      # with a Cloudflare Tunnel for public sites
 ```
@@ -151,6 +152,9 @@ On first boot, cloud-init on the server:
 - with `CLOUDFLARE_TUNNEL_TOKEN`, installs cloudflared from Cloudflare's apt repository and runs your tunnel;
 - with `--claude`, installs Claude Code for your user, plus what its sandbox needs. Run `claude` on the
   server to log in.
+- with `--codex`, installs OpenAI's Codex CLI for your user, plus the same sandbox pieces. Run
+  `codex login --device-auth` on the server to log in from your laptop's browser, after turning on device
+  code login in ChatGPT's security settings.
 
 ## Public websites
 

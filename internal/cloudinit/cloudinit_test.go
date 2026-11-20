@@ -47,12 +47,12 @@ func TestRenderMinimal(t *testing.T) {
 func TestRenderExtras(t *testing.T) {
 	c := base()
 	c.TunnelToken = "eyJhIjoiYiJ9"
-	c.Claude = true
+	c.Claude, c.Codex = true, true
 	doc, err := Render(c)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"tunnel run --token-file", "claude.ai/install.sh", "bubblewrap", "/etc/apparmor.d/bwrap"} {
+	for _, want := range []string{"tunnel run --token-file", "claude.ai/install.sh", "chatgpt.com/codex/install.sh", "bubblewrap", "/etc/apparmor.d/bwrap"} {
 		if !strings.Contains(doc, want) {
 			t.Errorf("missing %q", want)
 		}
@@ -141,7 +141,7 @@ func TestRedactSeveralHeaders(t *testing.T) {
 // go test ./internal/cloudinit -update rewrites them.
 func TestRenderGolden(t *testing.T) {
 	full := base()
-	full.TunnelToken, full.Claude = "eyJhIjoiYiJ9", true
+	full.TunnelToken, full.Claude, full.Codex = "eyJhIjoiYiJ9", true, true
 	full.Ready = []alert.Request{{URL: "https://ntfy.sh/closedvps-abc", Header: map[string]string{"Title": "vps is ready"}, Body: "ssh dev@vps"}}
 	for name, c := range map[string]Config{"minimal": base(), "full": full} {
 		doc, err := Render(c)

@@ -30,7 +30,7 @@ Commands:
 
 - `closedvps types`: prices and stock, read-only.
 - `closedvps create --dry-run [options]`: the plan and the exact cloud-init, buys nothing.
-- `closedvps create --yes --json [--count <n>] --type <t1:cap,t2> --location <l1,l2> --max-price <n> [--max-total <n>] [--backups] [--claude]`:
+- `closedvps create --yes --json [--count <n>] --type <t1:cap,t2> --location <l1,l2> --max-price <n> [--max-total <n>] [--backups] [--claude] [--codex]`:
   buys the first in-stock matches, retrying every minute until all are bought. With `--count` above 1 the
   servers are named `<name>-1` to `<name>-<n>`.
 - `closedvps list`: every server in the Hetzner project, made by closedvps or not, and whether the internet can

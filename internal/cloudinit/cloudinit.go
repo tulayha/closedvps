@@ -46,6 +46,7 @@ type Config struct {
 	TailscaleKey string
 	TunnelToken  string
 	Claude       bool
+	Codex        bool
 	// Ready are sent by the server once it has joined the tailnet, so the alert comes even when the computer
 	// running closedvps can't watch the tailnet.
 	Ready []alert.Request
