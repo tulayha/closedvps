@@ -19,13 +19,13 @@
   <p>Open <a href="https://login.tailscale.com/admin/acls">Access controls</a> in the Tailscale admin console, add
     the tag, and change who may start connections from everyone to the people in your tailnet:</p>
   <pre class="term"><code>"tagOwners": { "tag:closedvps": ["autogroup:admin"] },
-"acls": [
+"grants": [
   // was "src": ["*"]
-  { "action": "accept", "src": ["autogroup:member"], "dst": ["*:*"] },
+  {"src": ["autogroup:member"], "dst": ["*"], "ip": ["*"]},
 ],</code></pre>
-  <p>A tagged device belongs to its tag instead of a person, so <code>autogroup:member</code> leaves it out. If
-    your file has a <code>grants</code> section in place of <code>acls</code>, change the allow-everything grant the
-    same way, to <code>"src": ["autogroup:member"]</code>. The <code>ssh</code> section stays as it is. If you
+  <p>A tagged device belongs to its tag instead of a person, so <code>autogroup:member</code> leaves it out. An
+    older tailnet whose file has <code>acls</code> in place of <code>grants</code> changes the <code>src</code> of
+    its allow-everything rule the same way. The <code>ssh</code> section stays as it is. If you
     already tag other devices, such as a home server, they lose the right to start connections too, so give them
     their own rule.</p>
 
