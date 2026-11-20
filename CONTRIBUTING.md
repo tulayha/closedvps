@@ -26,6 +26,24 @@ go test ./internal/alert -run '^$' -fuzz '^FuzzCurlConfig$' -fuzztime 5m
 
 A failing input lands in `testdata/fuzz/` and stays there as a test.
 
+## Pull requests and release notes
+
+PRs are squash-merged, so the PR title becomes the commit subject on `main`. Titles take the form
+`type: Subject` with a capital after the colon and no scope:
+
+| Type | For | In the release notes |
+| --- | --- | --- |
+| `feat` | something new people can use | under New |
+| `fix` | something that was broken for people | under Fixes |
+| `docs`, `site`, `test`, `ci`, `build`, `chore`, `refactor` | everything else | no |
+
+A `feat` or `fix` title goes into the notes word for word after its type, so write it for someone using
+closedvps: `feat: Warn when a new server joins the tailnet untagged`, not how the code changed. A CI check
+fails a PR whose title doesn't fit. Commits pushed to `main` directly follow the same form.
+
+A `v*` tag makes a draft release. Read its notes, fix any line that reads badly, then publish it; the install
+scripts and `closedvps upgrade` keep the previous release until then.
+
 ## Layout
 
 | Where | What |

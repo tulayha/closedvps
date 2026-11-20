@@ -1,3 +1,6 @@
+<!-- Title: "type: Subject", e.g. "feat: Ask for a tagged Tailscale key". feat and fix titles go into the
+release notes word for word, so write them for people using closedvps. Types and rules: CONTRIBUTING.md. -->
+
 ## What changes
 
 ## How it was checked
