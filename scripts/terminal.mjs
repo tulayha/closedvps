@@ -1,10 +1,18 @@
-// Builds the example terminal on the home page from testdata/example-run.txt, the output of a whole create
-// that `go test` records. It rewrites the static lines and the animated story in public/index.html, and the
-// plain copy in public/index.md. TestSiteShowsRealOutput checks every closedvps line is real.
+// Builds the example terminal on the home page from testdata/example-run.txt in the latest closedvps release,
+// the output of a whole create that the CLI's tests record. It rewrites the static lines and the animated story
+// in public/index.html, and the plain copy in public/index.md. The site build runs it, so the deployed page
+// always shows what the released CLI prints.
 import { readFileSync, writeFileSync } from "node:fs";
 
 const here = new URL("..", import.meta.url).pathname;
-const run = readFileSync(`${here}../testdata/example-run.txt`, "utf8").trimEnd().split("\n");
+const repo = "tulayha/closedvps";
+const get = async (url) => {
+  const res = await fetch(url, { headers: { "user-agent": "closedvps-site-build" } });
+  if (!res.ok) throw new Error(`${url}: ${res.status}`);
+  return res;
+};
+const tag = process.env.CLOSEDVPS_REF ?? (await (await get(`https://api.github.com/repos/${repo}/releases/latest`)).json()).tag_name;
+const run = (await (await get(`https://raw.githubusercontent.com/${repo}/${tag}/testdata/example-run.txt`)).text()).trimEnd().split("\n");
 
 const span = (cls) => (t) => `<span class="${cls}">${t}</span>`;
 const D = span("dim"), OK = span("ok"), HL = span("hl"), W = span("warn"), B = span("b");
