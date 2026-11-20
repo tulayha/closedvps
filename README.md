@@ -198,15 +198,15 @@ devices able to reach the servers and stop the servers from opening connections 
 
 ```jsonc
 "tagOwners": { "tag:closedvps": ["autogroup:admin"] },
-"acls": [
+"grants": [
   // was "src": ["*"]; tagged servers aren't members, so they can only answer
-  { "action": "accept", "src": ["autogroup:member"], "dst": ["*:*"] },
+  {"src": ["autogroup:member"], "dst": ["*"], "ip": ["*"]},
 ],
 ```
 
 Then generate auth keys with the tag `tag:closedvps`. Replies to your connections still get through, and
-tagged devices skip key expiry. If your policy uses `grants`, change the `src` of the allow-everything grant
-the same way. A server that's already running gets the tag from the Machines page, its menu, Edit tags.
+tagged devices skip key expiry. An older tailnet whose policy has `acls` in place of `grants` changes the
+`src` of its allow-everything rule the same way. A server that's already running gets the tag from the Machines page, its menu, Edit tags.
 [closedvps.com/tailscale](https://closedvps.com/tailscale) explains each step.
 
 ## If Tailscale stops working
