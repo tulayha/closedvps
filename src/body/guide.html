@@ -4,8 +4,7 @@
   <p>These steps give a new Hetzner server no open ports, SSH only over Tailscale and automatic security
     updates. <a href="/">ClosedVPS</a> does this in one command, adds a non-root user, and keeps trying while Hetzner is sold out. The server joins Tailscale on its first boot, so port 22 is never open to the internet. If you lock
     yourself out, add an inbound rule for TCP 22 from your own IP to the firewall, SSH to the public IP, fix
-    Tailscale and delete the rule. On a server that's already running, install Tailscale and SSH in over it
-    before you attach the firewall.</p>
+    Tailscale and delete the rule. For a server that's already running, see the last section.</p>
 
   <h2 id="1-make-the-firewall-first">1. Make the firewall first</h2>
   <p>In the Hetzner Console open Firewalls, Create Firewall, delete the SSH and ICMP rules it suggests, and save.
@@ -40,6 +39,19 @@ END</code></pre>
   <p>In the Cloudflare dashboard go to Networking, Tunnels, Create a <a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/">tunnel</a>, and run the install command it shows
     on the server. Then on the tunnel's Routes tab add a published application with the service URL
     <code>http://127.0.0.1:3000</code> (your app's port). The tunnel connects outward, so the firewall stays shut.</p>
+
+  <h2 id="close-a-server-you-already-have">Close a server you already have</h2>
+  <p><code>closedvps list</code> shows every server in your Hetzner project and marks the ones the internet can
+    reach as <code>OPEN</code>, with the rule that lets traffic in. A server with no firewall takes connections on
+    every port it listens on, Docker's published ports included. Close one in this order, so you can always get
+    back in:</p>
+  <pre class="term"><code>curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up --auth-key=tskey-auth-XXXX --hostname=vps</code></pre>
+  <p>Run that over your current SSH session, with a tagged key as in step 2, then open a second terminal and
+    check <code>ssh you@vps</code> works over Tailscale. Only then make a firewall with no inbound rules as in
+    step 1 and pick the server under Apply to. The session you're in stays open, since the firewall lets
+    connections that already exist carry on, but no new one gets in from the internet (<a href="https://docs.hetzner.com/cloud/firewalls/faq/">Hetzner's firewall FAQ</a>).
+    Steps 3 and 4 apply as they are.</p>
 </main>
-<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#1-make-the-firewall-first">1. Make the firewall first</a><a href="#2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</a><a href="#3-turn-off-ssh-passwords">3. Turn off SSH passwords</a><a href="#4-let-security-updates-reboot-it">4. Let security updates reboot it</a><a href="#5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</a></nav>
+<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#1-make-the-firewall-first">1. Make the firewall first</a><a href="#2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</a><a href="#3-turn-off-ssh-passwords">3. Turn off SSH passwords</a><a href="#4-let-security-updates-reboot-it">4. Let security updates reboot it</a><a href="#5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</a><a href="#close-a-server-you-already-have">Close a server you already have</a></nav>
 </div>
