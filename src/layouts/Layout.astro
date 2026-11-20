@@ -2,7 +2,7 @@
 import { Font } from "astro:assets";
 import { site, org, page, markdown } from "../site.js";
 
-const footer = "<footer><a href=\"/claude-code\">Claude Code on a VPS</a><a href=\"/sold-out\">When Hetzner is sold out</a><a href=\"/tailscale\">Tailscale for a VPS</a><a href=\"https://github.com/tulayha/closedvps/blob/main/LICENSE\">MIT licensed</a><a href=\"https://github.com/tulayha/closedvps\">Source</a><a href=\"https://github.com/tulayha/closedvps#security-model\">Security model</a><a href=\"/llms.txt\">llms.txt</a></footer>";
+const footer = "<footer><a href=\"/claude-code\">Claude Code on a VPS</a><a href=\"/codex\">Codex on a VPS</a><a href=\"/sold-out\">When Hetzner is sold out</a><a href=\"/tailscale\">Tailscale for a VPS</a><a href=\"https://github.com/tulayha/closedvps/blob/main/LICENSE\">MIT licensed</a><a href=\"https://github.com/tulayha/closedvps\">Source</a><a href=\"https://github.com/tulayha/closedvps#security-model\">Security model</a><a href=\"/llms.txt\">llms.txt</a></footer>";
 
 const { path, schema = [], notFound = false } = Astro.props;
 const p = notFound ? { title: "Not found · ClosedVPS" } : page(path);

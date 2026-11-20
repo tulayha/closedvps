@@ -1,0 +1,8 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { dated } from "../site.js";
+import body from "../body/codex.html?raw";
+---
+<Layout path="/codex">
+<Fragment set:html={dated("/codex", body)} />
+</Layout>

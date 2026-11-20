@@ -1,0 +1,43 @@
+<div class="docgrid">
+<main class="doc">
+  <h1>Codex on a Hetzner VPS, with every port closed</h1>
+  <p>On a VPS, OpenAI's Codex CLI keeps working while your laptop sleeps. It also runs the code it writes, starts
+    dev servers and installs packages, so the server it runs on should have nothing reachable from the internet.
+    <a href="/">ClosedVPS</a> buys that server with one command and installs Codex on it.</p>
+
+  <h2 id="pick-a-server">Pick a server</h2>
+  <p>Codex <a href="https://github.com/openai/codex/blob/main/docs/install.md">asks for 4 GB of RAM at least and
+    recommends 8 GB</a>. On Hetzner that's a CX23 or the ARM CAX11 at 4 GB, or a CX33 at 8 GB
+    (<a href="https://www.hetzner.com/cloud/">current prices</a>). The cheap types are often sold out, and
+    <a href="/sold-out">what to do when Hetzner is sold out</a> covers that.</p>
+
+  <h2 id="create-it-with-codex-on-it">Create it with Codex on it</h2>
+  <pre class="term"><code>closedvps create --codex --type cx33,cx23,cax11</code></pre>
+  <p>It buys the first of those that's in stock, behind a Hetzner firewall with no inbound rules, and the server
+    joins your tailnet on its first boot. You get a user named after your account on your computer, with your SSH
+    key, and Codex installed for that user. Codex sandboxes its commands with bubblewrap, which
+    <a href="https://learn.chatgpt.com/codex/sandboxing#prerequisites">can't create the user namespace it needs on
+    Ubuntu 24.04</a> without an AppArmor profile, so ClosedVPS installs bubblewrap and adds that profile. Add
+    <code>--claude</code> to put Claude Code on the same server.</p>
+
+  <h2 id="log-in">Log in</h2>
+  <p>First turn on device code login in your ChatGPT security settings. Then:</p>
+  <pre class="term"><code>ssh dev@vps
+codex login --device-auth</code></pre>
+  <p>Open the link it prints in your laptop's browser, sign in, and enter the one-time code
+    (<a href="https://learn.chatgpt.com/codex/auth#login-on-headless-devices">OpenAI's docs on headless login</a>).
+    Then run <code>codex</code> inside <code>tmux</code>, so it keeps going after you close SSH.</p>
+
+  <h2 id="open-what-it-builds">Open what it builds</h2>
+  <p>A dev server that listens on all interfaces opens from your laptop at <code>http://vps:3000</code>, over
+    Tailscale, while the Hetzner firewall drops everything from the internet. To keep the server from reaching
+    your laptop in return, give it the tag in <a href="/tailscale">Tailscale for a VPS</a>.</p>
+
+  <h2 id="doing-it-by-hand">Doing it by hand</h2>
+  <p>Follow <a href="/guide">how to lock down a Hetzner VPS by hand</a>, add a non-root user, and give bubblewrap
+    its AppArmor profile as in <a href="/claude-code#doing-it-by-hand">the Claude Code steps</a>, with
+    <code>apt install bubblewrap</code>. Then, as that user:</p>
+  <pre class="term"><code>curl -fsSL https://chatgpt.com/codex/install.sh | sh</code></pre>
+</main>
+<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#pick-a-server">Pick a server</a><a href="#create-it-with-codex-on-it">Create it with Codex on it</a><a href="#log-in">Log in</a><a href="#open-what-it-builds">Open what it builds</a><a href="#doing-it-by-hand">Doing it by hand</a></nav>
+</div>

@@ -61,6 +61,17 @@ export const pages = [
     modified: "2026-11-20",
   },
   {
+    path: "/codex",
+    type: "TechArticle",
+    title: "Run OpenAI Codex CLI on a Hetzner VPS with no open ports",
+    name: "Codex on a Hetzner VPS",
+    description:
+      "A Hetzner VPS for OpenAI's Codex CLI with nothing open to the internet: SSH over Tailscale, the bubblewrap sandbox working on Ubuntu 24.04, and device-code login.",
+    llms: "picking a server, `--codex`, device-code login, the bubblewrap sandbox on Ubuntu 24.04, and the manual steps",
+    published: "2026-11-20",
+    modified: "2026-11-20",
+  },
+  {
     path: "/sold-out",
     type: "TechArticle",
     title: "Hetzner CX23 not available? How to get one anyway",
