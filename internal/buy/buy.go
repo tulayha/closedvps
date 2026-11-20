@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"slices"
 	"strconv"
@@ -171,16 +170,31 @@ type Buyer struct {
 	Wants    Wants
 	MaxTotal float64 // most all closedvps servers in the project may cost per month; 0 is no limit
 	Interval time.Duration
-	Log      io.Writer
 	Currency string
 	Sleep    func(ctx context.Context, d time.Duration) error
-	Now      func() time.Time
 	Bought   func(p Purchase, n int) // as each server is bought, n counting from 1
-	Waiting  func(check, bought int)
+	// Waiting is called after each look that left something to buy, before the wait for the next.
+	Waiting func(w Look)
+	// Refused is called the first time Hetzner refuses a candidate with a given message.
+	Refused func(c Candidate, msg string)
+	// Failed is called when a look itself failed in a way the next look may not.
+	Failed func(what string, err error)
+	// UserData, when set, makes a slot's first-boot setup just before each try, so a key in it is fresh.
+	UserData func(name string) (string, error)
 
-	got    []Purchase
-	posted map[string]bool // names a create was sent for
-	seen   map[string]bool // refusal messages already printed
+	got       []Purchase
+	posted    map[string]bool // names a create was sent for
+	seen      map[string]bool // refusal messages already reported
+	lastTypes []*hcloud.ServerType
+	lastIPv4  map[string]float64
+}
+
+// Look is one look at the stock that didn't fill every slot: what Hetzner listed then, so the caller can say
+// what's in stock that the caps or memory rule out.
+type Look struct {
+	Check, Bought int
+	Types         []*hcloud.ServerType
+	IPv4          map[string]float64
 }
 
 // Run buys until every slot is filled, a refusal waiting can't fix, or ctx ends. It returns what was bought,
@@ -195,11 +209,8 @@ func (b *Buyer) Run(ctx context.Context) ([]Purchase, error) {
 		if err != nil {
 			return b.got, err
 		}
-		if check == 1 {
-			fmt.Fprintf(b.Log, "Trying again every %s until %s bought. Ctrl+C stops.\n", Every(b.Interval), plural(len(b.Slots)-len(b.got), "one is", "they're all"))
-		}
 		if b.Waiting != nil {
-			b.Waiting(check, len(b.got))
+			b.Waiting(Look{Check: check, Bought: len(b.got), Types: b.lastTypes, IPv4: b.lastIPv4})
 		}
 		if err := b.Sleep(ctx, b.Interval); err != nil {
 			return b.got, err
@@ -293,7 +304,9 @@ func (b *Buyer) check(ctx context.Context, check int) error {
 		if IsFatal(err) || ctx.Err() != nil {
 			return err
 		}
-		fmt.Fprintf(b.Log, "%s  %s failed: %v\n", b.clock(), what, err)
+		if b.Failed != nil {
+			b.Failed(what, err)
+		}
 		return nil
 	}
 	types, err := b.API.ServerTypes(ctx)
@@ -304,6 +317,7 @@ func (b *Buyer) check(ctx context.Context, check int) error {
 	if err != nil {
 		return retry("reading prices", err)
 	}
+	b.lastTypes, b.lastIPv4 = types, prices.IPv4
 	cands := b.Wants.Candidates(types, prices.IPv4)
 	if len(cands) == 0 {
 		return errors.New("nothing on your list is under its price cap any more; see `closedvps types`")
@@ -322,7 +336,6 @@ func (b *Buyer) check(ctx context.Context, check int) error {
 		}
 	}
 	avail := Availability(types)
-	before, tried := len(b.got), 0
 	for len(b.got) < len(b.Slots) {
 		slot := b.Slots[len(b.got)]
 		var bought bool
@@ -330,12 +343,17 @@ func (b *Buyer) check(ctx context.Context, check int) error {
 			if !avail[c.String()] || (b.MaxTotal > 0 && spent+c.Price > b.MaxTotal+1e-9) {
 				continue
 			}
-			tried++
+			if b.UserData != nil {
+				ud, err := b.UserData(slot.Name)
+				if err != nil {
+					return retry("making a Tailscale key", err)
+				}
+				slot.UserData = ud
+			}
 			p, err := b.create(ctx, slot, c, types, prices.IPv4)
 			if err == nil {
 				b.got = append(b.got, p)
 				spent += p.Candidate.Price
-				fmt.Fprintf(b.Log, "%s  %-12s %s bought, %s\n", b.clock(), p.Candidate, slot.Name, Money(p.Candidate.Price, b.Currency))
 				if b.Bought != nil {
 					b.Bought(p, len(b.got))
 				}
@@ -348,23 +366,16 @@ func (b *Buyer) check(ctx context.Context, check int) error {
 			if IsFatal(err) {
 				return fmt.Errorf("Hetzner refused %s: %w", c, err)
 			}
-			if msg := err.Error(); !b.seen[msg] {
-				b.seen[msg] = true
-				fmt.Fprintf(b.Log, "%s  %-12s refused: %s\n", b.clock(), c, msg)
-			} else {
-				fmt.Fprintf(b.Log, "%s  %-12s refused again\n", b.clock(), c)
+			if msg := err.Error(); !b.seen[c.String()+msg] {
+				b.seen[c.String()+msg] = true
+				if b.Refused != nil {
+					b.Refused(c, msg)
+				}
 			}
 		}
 		if !bought {
 			break
 		}
-	}
-	switch left := len(b.Slots) - len(b.got); {
-	case left == 0:
-	case tried == 0 && before == 0:
-		fmt.Fprintf(b.Log, "%s  nothing on your list is in stock (check %d)\n", b.clock(), check)
-	case len(b.got) > 0 && (len(b.got) > before || tried == 0):
-		fmt.Fprintf(b.Log, "%s  %d of %d bought, waiting for %d more (check %d)\n", b.clock(), len(b.got), len(b.Slots), left, check)
 	}
 	return nil
 }
@@ -392,20 +403,6 @@ func (b *Buyer) create(ctx context.Context, slot hcloud.ServerCreateOpts, c Cand
 	return Purchase{}, err
 }
 
-func (b *Buyer) clock() string {
-	if b.Now == nil {
-		return time.Now().Format("15:04:05")
-	}
-	return b.Now().Format("15:04:05")
-}
-
-func plural(n int, one, many string) string {
-	if n == 1 {
-		return one
-	}
-	return many
-}
-
 // Every says an interval the way people do: "minute", "5 minutes", "30 seconds".
 func Every(d time.Duration) string {
 	switch {
@@ -422,5 +419,5 @@ func Money(v float64, currency string) string {
 	if currency == "" {
 		currency = "EUR"
 	}
-	return fmt.Sprintf("%.2f %s/month", v, currency)
+	return fmt.Sprintf("%.2f %s/mo", v, currency)
 }

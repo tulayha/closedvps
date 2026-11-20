@@ -3,7 +3,6 @@ package buy
 import (
 	"context"
 	"errors"
-	"io"
 	"math"
 	"net"
 	"strings"
@@ -220,7 +219,7 @@ func (f *fakeAPI) Create(_ context.Context, o hcloud.ServerCreateOpts) (hcloud.S
 func newBuyer(api API, w Wants, n int) (*Buyer, *int) {
 	sleeps := 0
 	b := &Buyer{
-		API: api, Wants: w, Interval: time.Minute, Log: io.Discard,
+		API: api, Wants: w, Interval: time.Minute,
 		Sleep: func(context.Context, time.Duration) error { sleeps++; return nil },
 	}
 	for i := 1; i <= n; i++ {

@@ -30,19 +30,21 @@ func (e echo) Read(p []byte) (int, error) {
 }
 
 // exampleRun is a whole `closedvps create` in a terminal, with the prices of 19 Nov 2026: cx23 in nbg1 stays
-// sold out, cax11 in hel1 comes into stock two and a half hours in, and the server joins the tailnet.
+// sold out, cax11 in hel1 comes into stock two and a half hours in, and the server joins the tailnet. The
+// output isn't watched, so the wait shows as the hourly lines a log gets rather than a spinner.
 func exampleRun(t *testing.T) string {
 	t.Helper()
 	never := func(int) bool { return false }
 	_, url := hetznertest.New(t,
 		&hetznertest.Type{Name: "cx23", Location: "nbg1", Price: "5.49", InStock: never, Left: -1},
-		&hetznertest.Type{Name: "cax11", Location: "hel1", Arch: "arm", Price: "5.99", InStock: hetznertest.From(3), Left: -1})
+		&hetznertest.Type{Name: "cax11", Location: "hel1", Arch: "arm", Price: "5.99", InStock: hetznertest.From(152), Left: -1})
 	tr := newTestApp(t, url)
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home) // os.UserHomeDir on Windows
 	t.Setenv("CLOSEDVPS_SSH_KEY", "")
 	t.Setenv("CLOSEDVPS_NOTIFY", "")
+	t.Setenv("TS_AUTHKEY", "")
 	if err := os.MkdirAll(filepath.Join(home, ".ssh"), 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -58,12 +60,10 @@ func exampleRun(t *testing.T) string {
 	a.stdout, a.log, a.stderr = &out, &out, &out
 	a.tty = true
 	a.in = bufio.NewReader(echo{strings.NewReader("y\n"), &out})
+	a.readSecret = func() (string, error) { return "tskey-auth-example", nil }
 	clock := time.Date(2026, 11, 19, 9, 14, 2, 0, time.UTC)
 	a.now = func() time.Time { return clock }
 	a.sleep = func(_ context.Context, d time.Duration) error {
-		if d == time.Minute {
-			d = 149 * time.Minute // the wait for stock
-		}
 		clock = clock.Add(d)
 		return nil
 	}

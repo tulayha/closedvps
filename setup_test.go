@@ -18,15 +18,16 @@ func TestSetupWizardSavesAnswers(t *testing.T) {
 		&hetznertest.Type{Name: "cx23", Price: "4.00", InStock: hetznertest.Always},
 		&hetznertest.Type{Name: "cax11", Price: "4.50", InStock: hetznertest.Always})
 	tr := newTestApp(t, url)
-	// location, an unknown type, a bad cap, good types, backups (Enter keeps no), price, total, user, and
-	// alerts by number (4 is None when nothing is saved).
-	answers(tr, "3,nbg1", "cx99", "cx23:x", "cax11:6,cx23", "", "12", "30", "me", "4")
+	// purpose by number (2 is Claude Code), locations, backups (Enter keeps no), price, an unknown type, a bad
+	// cap, good types, total, user, alerts by number (4 is None when nothing is saved), and no Tailscale client.
+	answers(tr, "2", "3,nbg1", "", "12", "cx99", "cx23:x", "cax11:6,cx23", "30", "me", "4", "")
+	tr.app.tty, tr.app.plain = true, true
 	p, err := tr.app.setupWizard(context.Background(), tr.app.client("t"), defaultPrefs())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Join(p.Locations, ",") != "hel1,nbg1" || strings.Join(p.Types, ",") != "cax11:6,cx23" || p.MaxPrice != 12 || p.MaxTotal != 30 || p.User != "me" || p.Backups {
-		t.Fatalf("got %+v", p)
+	if strings.Join(p.Locations, ",") != "hel1,nbg1" || strings.Join(p.Types, ",") != "cax11:6,cx23" || p.MaxPrice != 12 || p.MaxTotal != 30 || p.User != "me" || p.Backups || !p.Claude || p.Codex {
+		t.Fatalf("got %+v\n%s", p, tr.stderr)
 	}
 	saved, ok, err := loadPrefs()
 	if err != nil || !ok || saved.User != "me" {

@@ -16,9 +16,10 @@ import (
 // Type is a server type on sale in one location.
 type Type struct {
 	Name     string
-	Location string // nbg1 when empty
-	Arch     string // x86 when empty
-	Price    string // per month before VAT
+	Location string  // nbg1 when empty
+	Arch     string  // x86 when empty
+	Price    string  // per month before VAT
+	Memory   float64 // GB; 4 when 0
 	// InStock says whether the type shows as available on the n-th look at the stock, counting from 1.
 	InStock func(look int) bool
 	// Left is how many creates succeed before it sells out; below 0 is no limit.
@@ -41,6 +42,8 @@ type Cloud struct {
 	UserData    map[string]string // by server name
 	Firewalls   []map[string]any
 	Deleted     []string // names of deleted firewalls
+	Gone        []string // names of deleted servers
+	Images      []map[string]any
 	BackupsOn   []string // names of servers backups were turned on for
 	FailedPaths []string // requests nothing here answers
 }
@@ -89,8 +92,12 @@ func (c *Cloud) typeJSON(i int, t *Type, avail bool) map[string]any {
 		arch = "x86"
 	}
 	l := location(t.loc())
+	mem := t.Memory
+	if mem == 0 {
+		mem = 4
+	}
 	return map[string]any{
-		"id": i + 1, "name": t.Name, "cpu_type": "shared", "architecture": arch, "cores": 2, "memory": 4, "disk": 40,
+		"id": i + 1, "name": t.Name, "cpu_type": "shared", "architecture": arch, "cores": 2, "memory": mem, "disk": 40,
 		"prices":    []any{map[string]any{"location": t.loc(), "price_monthly": map[string]string{"net": t.Price, "gross": t.Price}}},
 		"locations": []any{map[string]any{"id": l["id"], "name": t.loc(), "available": avail, "recommended": true, "deprecation": nil}},
 	}
@@ -168,7 +175,7 @@ func (c *Cloud) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && p == "/servers":
 		out := []any{}
 		for _, s := range c.Servers {
-			if n := q.Get("name"); n != "" && n != s["name"] {
+			if n := q.Get("name"); (n != "" && n != s["name"]) || s["gone"] == true {
 				continue
 			}
 			if sel := q.Get("label_selector"); sel != "" {
@@ -189,6 +196,30 @@ func (c *Cloud) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		reply(w, 201, map[string]any{"action": action(500+len(c.BackupsOn), "enable_backup")})
 	case r.Method == http.MethodGet && strings.HasPrefix(p, "/servers/"):
 		reply(w, 200, map[string]any{"server": c.Servers[idFrom(p, "/servers/")-1]})
+	case r.Method == http.MethodDelete && strings.HasPrefix(p, "/servers/"):
+		id := idFrom(p, "/servers/")
+		s := c.Servers[id-1]
+		s["gone"] = true
+		c.Gone = append(c.Gone, s["name"].(string))
+		for _, f := range c.Firewalls {
+			var keep []any
+			for _, a := range f["applied_to"].([]any) {
+				if a.(map[string]any)["server"].(map[string]any)["id"] != id {
+					keep = append(keep, a)
+				}
+			}
+			if keep == nil {
+				keep = []any{}
+			}
+			f["applied_to"] = keep
+		}
+		reply(w, 200, map[string]any{"action": action(900+id, "delete_server")})
+	case r.Method == http.MethodGet && p == "/images":
+		out := []any{}
+		for _, i := range c.Images {
+			out = append(out, i)
+		}
+		reply(w, 200, map[string]any{"images": out, "meta": page})
 
 	case r.Method == http.MethodGet && p == "/actions":
 		var acts []any
@@ -213,7 +244,7 @@ func (c *Cloud) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && p == "/firewalls":
 		out := []any{}
 		for _, f := range c.Firewalls {
-			if f["name"] == q.Get("name") {
+			if n := q.Get("name"); (n == "" || f["name"] == n) && f["gone"] != true {
 				out = append(out, f)
 			}
 		}
@@ -229,6 +260,7 @@ func (c *Cloud) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		reply(w, 201, map[string]any{"firewall": fw, "actions": []any{}})
 	case r.Method == http.MethodDelete && strings.HasPrefix(p, "/firewalls/"):
 		fw := c.Firewalls[idFrom(p, "/firewalls/")-101]
+		fw["gone"] = true
 		c.Deleted = append(c.Deleted, fw["name"].(string))
 		w.WriteHeader(http.StatusNoContent)
 	case r.Method == http.MethodGet && strings.HasPrefix(p, "/firewalls/"):

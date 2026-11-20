@@ -86,6 +86,22 @@ write_files:
   - path: /var/lib/closedvps/ready-0.curl
     permissions: "0600"
     content: "globoff\nurl = \"https://ntfy.sh/closedvps-abc\"\nheader = \"Title: vps is ready\"\ndata-binary = \"ssh dev@vps\"\n"
+  # The server asks for tag:closedvps itself, so a key made without the tag still gives a tagged server. Only
+  # when the tailnet's policy refuses the tag ("requested tags [...] are invalid or not permitted", which leaves
+  # a one-off key unspent) does it join untagged, and closedvps then says how to fix that. tailscale up keeps the
+  # refused --advertise-tags, so the second try needs --reset. Any other failure (no network yet) fails the
+  # unit, which retries.
+  - path: /usr/local/lib/closedvps/join.sh
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+      key=file:/var/lib/closedvps/tailscale-key
+      out=$(tailscale up --auth-key="$key" --hostname=vps --advertise-tags=tag:closedvps 2>&1) && exit 0
+      echo "$out" >&2
+      case "$out" in
+        *"requested tags"*) exec tailscale up --reset --auth-key="$key" --hostname=vps ;;
+      esac
+      exit 1
   - path: /etc/systemd/system/closedvps-join.service
     content: |
       [Unit]
@@ -96,7 +112,7 @@ write_files:
 
       [Service]
       Type=oneshot
-      ExecStart=/usr/bin/tailscale up --auth-key=file:/var/lib/closedvps/tailscale-key --hostname=vps
+      ExecStart=/usr/local/lib/closedvps/join.sh
       ExecStartPost=/usr/bin/rm -f /var/lib/closedvps/tailscale-key
       # The "ready" alerts, then their links are deleted. A failed alert does not fail the join; $$ is systemd for $.
       ExecStartPost=-/bin/sh -c 'for f in /var/lib/closedvps/ready-*.curl; do curl -fsS --retry 5 --max-time 20 -K "$$f"; done; rm -f /var/lib/closedvps/ready-*.curl'

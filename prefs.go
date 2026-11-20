@@ -23,6 +23,8 @@ type prefs struct {
 	User      string   `json:"user"`
 	SSHKey    string   `json:"ssh_key,omitempty"`
 	MaxTotal  float64  `json:"max_total,omitempty"` // all closedvps servers in the project together; 0 is no limit
+	Claude    bool     `json:"claude,omitempty"`
+	Codex     bool     `json:"codex,omitempty"`
 }
 
 func defaultPrefs() prefs {
@@ -90,6 +92,8 @@ type store struct{ name, what string }
 var (
 	tokenStore = store{"hetzner-token", "Hetzner token"}
 	linksStore = store{"alert-links", "alert links"}
+	// tsClientStore is a Tailscale OAuth client: its ID, a newline, its secret.
+	tsClientStore = store{"tailscale-oauth", "Tailscale OAuth client"}
 )
 
 const keyringService = "closedvps"

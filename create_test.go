@@ -57,6 +57,8 @@ func newTestApp(t *testing.T, endpoint string) *testRun {
 		desktop:   func(title, _ string) { tr.mu.Lock(); tr.desktop = append(tr.desktop, title); tr.mu.Unlock() },
 		tailscale: func() string { return "" },
 		awake:     func() func() { return func() {} },
+		onTailnet: func(context.Context) bool { return true },
+		keygen:    func() error { return errors.New("no ssh-keygen in tests") },
 	}
 	t.Setenv("CLOSEDVPS_CONFIG_DIR", t.TempDir())
 	t.Setenv("HCLOUD_TOKEN", "test-token")
@@ -197,7 +199,7 @@ func TestCreateOneFailedStartSetsUpTheRest(t *testing.T) {
 			t.Fatalf("backups turned on for %v, want vps-2 only", cloud.BackupsOn)
 		}
 	})
-	if !strings.Contains(tr.stderr.String(), "vps-2 is running at 203.0.113.2") {
+	if !strings.Contains(tr.stderr.String(), "(vps-2, 203.0.113.2)") {
 		t.Fatalf("log:\n%s", tr.stderr)
 	}
 }
@@ -206,10 +208,13 @@ func TestCreateDryRunWithoutToken(t *testing.T) {
 	tr := newTestApp(t, "http://127.0.0.1:1") // never called
 	t.Setenv("HCLOUD_TOKEN", "")
 	t.Setenv("CLOUDFLARE_TUNNEL_TOKEN", "eyJhIjoiYiJ9")
-	if err := tr.run(context.Background(), "create", "--dry-run", "--user", "dev"); err != nil {
+	if err := tr.run(context.Background(), "create", "-n", "--show-setup", "--user", "dev"); err != nil {
 		t.Fatal(err)
 	}
-	out := tr.stdout.String()
+	if !strings.HasPrefix(tr.stdout.String(), "# First-boot setup") {
+		t.Errorf("the cloud-init should be all of stdout:\n%s", tr.stdout)
+	}
+	out := tr.stdout.String() + tr.stderr.String()
 	for _, want := range []string{"skips the stock check", "#cloud-config", "Cloudflare Tunnel", "<hidden: alert link and message>"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)

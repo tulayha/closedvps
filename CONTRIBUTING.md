@@ -5,7 +5,7 @@
 ```sh
 go test -race ./...
 golangci-lint run          # v2, config in .golangci.yml; `golangci-lint fmt` formats
-go run . create --dry-run  # the plan and the first-boot setup, no token needed
+go run . create -n --show-setup  # the plan and the first-boot setup, no token needed
 ```
 
 `lefthook install` (after installing [lefthook](https://lefthook.dev)) runs the formatter, the linter and
@@ -13,8 +13,8 @@ gitleaks before each commit, and the tests before each push. CI runs all of that
 short fuzz runs, `cloud-init schema` on the rendered setup, zizmor on the workflows, and the install scripts
 on macOS, Linux and Windows.
 
-Tests never touch Hetzner: `internal/hetznertest` is a fake of the API, and `closedvps create` without
-`--dry-run` buys a real server, so it never runs in tests or CI.
+Tests never touch Hetzner or Tailscale: `internal/hetznertest` and `internal/tsapi/tsapitest` are fakes of
+their APIs, and `closedvps create` without `--dry-run` buys a real server, so it never runs in tests or CI.
 
 Longer fuzz runs:
 
@@ -52,10 +52,12 @@ scripts and `closedvps upgrade` keep the previous release until then.
 | `app.go` | what commands touch outside their logic (output, questions, clock, Hetzner); tests swap it |
 | `create.go` | `closedvps create`, one method per step, with its help text (flags, environment, exit codes) |
 | `commands.go`, `setup.go` | the other commands |
+| `ui.go` | how output looks: ✓ ! ✗ - lines, the spinner, errors with their fix |
 | `report.go` | `--json` events and alerts |
 | `prefs.go`, `sshkey.go`, `tailscale.go`, `awake_*.go` | saved answers and secrets, the SSH key, the tailnet wait, keeping the computer awake |
 | `internal/buy` | what may be bought under which caps, and the loop that buys it |
 | `internal/cloud` | Hetzner through the official hcloud-go client |
+| `internal/tsapi` | Tailscale through its official Go client: one-off keys, the policy check, devices |
 | `internal/cloudinit` | the first-boot setup and the checks on what goes in it; `testdata/*.yaml` is the whole setup |
 | `internal/alert` | alert links and the requests that deliver to them |
 | `skills/closedvps` | the agent skill, also a Claude Code plugin (`claude plugin validate .`) |
@@ -66,7 +68,8 @@ The website, closedvps.com, is on the `site` branch, which has its own README.
 A change to the first-boot setup shows up as a diff in `internal/cloudinit/testdata/`: run
 `go test ./internal/cloudinit -update` and read it. Flags, environment variables and exit codes live in the
 help text in `create.go`; the skill repeats the exit codes and the events, and a test checks it does so word
-for word.
+for word. The stop codes are in the skill. `testdata/example-run.txt` is a whole run as a person sees it,
+which the site's terminal is built from: `go test . -run TestExampleRun -update` rewrites it.
 
 ## Releasing
 
