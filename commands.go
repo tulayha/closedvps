@@ -109,10 +109,11 @@ func newListCmd(a *app) *cobra.Command {
 	var asJSON bool
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Your closedvps servers and whether their firewall is still closed",
-		Long:  "Shows the servers closedvps made in this Hetzner project and whether each firewall is still closed.",
-		Args:  cobra.NoArgs,
-		RunE:  func(cmd *cobra.Command, _ []string) error { return a.list(cmd.Context(), asJSON) },
+		Short: "Every server in this Hetzner project and whether the internet can reach it",
+		Long: "Shows every server in this Hetzner project, made by closedvps or not, and whether its firewalls let " +
+			"anything in from the internet. A server with no firewall takes connections on every port it listens on.",
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error { return a.list(cmd.Context(), asJSON) },
 	}
 	cmd.Flags().BoolVar(&asJSON, "json", false, "print JSON")
 	return cmd
@@ -125,6 +126,7 @@ type serverRow struct {
 	Status   string `json:"status"`
 	IPv4     string `json:"ipv4"`
 	Firewall string `json:"firewall"` // "closed", or what's wrong
+	Managed  bool   `json:"closedvps"`
 }
 
 func (a *app) list(ctx context.Context, asJSON bool) error {
@@ -132,17 +134,17 @@ func (a *app) list(ctx context.Context, asJSON bool) error {
 	if err != nil {
 		return err
 	}
-	servers, err := api.Managed(ctx)
+	servers, err := api.Servers(ctx)
 	if err != nil {
 		return err
 	}
 	rows := make([]serverRow, 0, len(servers))
 	for _, s := range servers {
-		state, err := api.FirewallState(ctx, s)
+		state, err := api.Exposure(ctx, s)
 		if err != nil {
 			return err
 		}
-		row := serverRow{Name: s.Name, Status: string(s.Status), IPv4: cloud.IPv4(s), Firewall: state}
+		row := serverRow{Name: s.Name, Status: string(s.Status), IPv4: cloud.IPv4(s), Firewall: state, Managed: cloud.IsManaged(s)}
 		if s.ServerType != nil {
 			row.Type = s.ServerType.Name
 		}
@@ -155,15 +157,25 @@ func (a *app) list(ctx context.Context, asJSON bool) error {
 		return a.printJSON(rows)
 	}
 	if len(rows) == 0 {
-		fmt.Fprintln(a.stdout, "No closedvps servers in this project. Make one with: closedvps create")
+		fmt.Fprintln(a.stdout, "No servers in this project. Make one with: closedvps create")
 		return nil
+	}
+	open := false
+	for _, r := range rows {
+		open = open || strings.HasPrefix(r.Firewall, "OPEN")
 	}
 	tw := tabwriter.NewWriter(a.stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(tw, "NAME\tTYPE\tLOCATION\tSTATUS\tIPV4\tFIREWALL")
 	for _, r := range rows {
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\n", r.Name, r.Type, r.Location, r.Status, r.IPv4, r.Firewall)
 	}
-	return tw.Flush()
+	if err := tw.Flush(); err != nil {
+		return err
+	}
+	if open {
+		fmt.Fprintln(a.stdout, "\nOPEN servers take connections from the internet. closedvps.com/guide#close-a-server-you-already-have shows how to shut them without locking yourself out.")
+	}
+	return nil
 }
 
 func newOpenSSHCmd(a *app) *cobra.Command {

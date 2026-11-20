@@ -127,6 +127,11 @@ func (c *Client) ServerByName(ctx context.Context, name string) (*hcloud.Server,
 	return s, err
 }
 
+// Servers lists every server in this project.
+func (c *Client) Servers(ctx context.Context) ([]*hcloud.Server, error) {
+	return c.Server.All(ctx)
+}
+
 // Managed lists the servers closedvps made in this project.
 func (c *Client) Managed(ctx context.Context) ([]*hcloud.Server, error) {
 	return c.Server.AllWithOpts(ctx, hcloud.ServerListOpts{
@@ -251,6 +256,29 @@ func (c *Client) FirewallState(ctx context.Context, s *hcloud.Server) (string, e
 	}
 	if fw == nil || !AppliedToServer(fw, s.ID) {
 		return "MISSING: the server has no closedvps firewall", nil
+	}
+	open, err := c.OpenFirewalls(ctx, s.ID)
+	if err != nil {
+		return "", err
+	}
+	if len(open) == 0 {
+		return "closed", nil
+	}
+	return "OPEN: " + strings.Join(open, "; "), nil
+}
+
+// Exposure says whether the internet can reach a server: FirewallState for closedvps servers, and for others
+// whether any firewall is attached and what its inbound rules let in. Without a firewall every port the server
+// listens on is open.
+func (c *Client) Exposure(ctx context.Context, s *hcloud.Server) (string, error) {
+	if IsManaged(s) {
+		return c.FirewallState(ctx, s)
+	}
+	if IPv4(s) == "" && (s.PublicNet.IPv6.IP == nil || s.PublicNet.IPv6.IP.IsUnspecified()) {
+		return "closed: no public IP", nil
+	}
+	if len(s.PublicNet.Firewalls) == 0 {
+		return "OPEN: no firewall", nil
 	}
 	open, err := c.OpenFirewalls(ctx, s.ID)
 	if err != nil {

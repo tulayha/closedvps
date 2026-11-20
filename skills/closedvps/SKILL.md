@@ -33,7 +33,8 @@ Commands:
 - `closedvps create --yes --json [--count <n>] --type <t1:cap,t2> --location <l1,l2> --max-price <n> [--max-total <n>] [--backups] [--claude]`:
   buys the first in-stock matches, retrying every minute until all are bought. With `--count` above 1 the
   servers are named `<name>-1` to `<name>-<n>`.
-- `closedvps list`: servers and whether each firewall is still closed.
+- `closedvps list`: every server in the Hetzner project, made by closedvps or not, and whether the internet can
+  reach each one (`closedvps` in `--json` says which closedvps made).
 - `closedvps open-ssh <name>` / `closedvps close-ssh <name>`: temporary SSH from the caller's IP when
   Tailscale is broken. Always close it afterwards.
 

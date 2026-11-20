@@ -220,6 +220,13 @@ in the Hetzner Console under the server's Rescue tab (Reset root password), then
 console's `>_` button. SSH never allows root, so that password only works there. If the reset fails, the same
 tab can boot a rescue system with your SSH key; run `closedvps open-ssh` first so you can reach it.
 
+## Servers you already have
+
+`closedvps list` shows every server in the Hetzner project, made by ClosedVPS or not, and marks each one
+`closed` or `OPEN` with what lets traffic in. A server with no firewall takes connections on every port it
+listens on, Docker's published ports included. [Closing one by hand](https://closedvps.com/guide#close-a-server-you-already-have)
+puts Tailscale on it before the firewall goes on, so you never lose your way in.
+
 ## Removing a server
 
 Delete the server in the Hetzner Console, then its `closedvps-<name>` firewall, and remove the machine from
