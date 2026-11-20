@@ -31,7 +31,8 @@
 
   <h2 id="make-a-tagged-auth-key">Make a tagged auth key</h2>
   <p>In <a href="https://login.tailscale.com/admin/settings/keys">Settings, Keys</a>, choose Generate auth key, turn
-    on Pre-approved and Tags, and pick <code>tag:closedvps</code>. Leave Reusable off for one server. For several
+    on Tags, and pick <code>tag:closedvps</code>. If your tailnet asks you to approve new devices, turn on
+    Pre-approved as well. Leave Reusable off for one server. For several
     at once with <code>--count</code>, turn it on and let the key expire within a day. A device that joins with
     the key gets its tag:</p>
   <blockquote><p>After a device logs in as the user who generated the auth key, the device assumes the identity of the auth key's tags.</p>

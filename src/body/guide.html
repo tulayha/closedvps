@@ -12,7 +12,7 @@
 
   <h2 id="2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</h2>
   <p>First make the policy change in <a href="/tailscale">Tailscale for a VPS</a>, so the server can't reach your
-    other devices. Then make a one-off, pre-approved <a href="https://tailscale.com/kb/1085/auth-keys">auth key</a> with the tag <code>tag:closedvps</code> at <a href="https://login.tailscale.com/admin/settings/keys">login.tailscale.com/admin/settings/keys</a>. Create the server with your SSH key,
+    other devices. Then make a one-off <a href="https://tailscale.com/kb/1085/auth-keys">auth key</a> with the tag <code>tag:closedvps</code> at <a href="https://login.tailscale.com/admin/settings/keys">login.tailscale.com/admin/settings/keys</a>. Create the server with your SSH key,
     the new firewall selected, and this under Cloud config. A tagged server never hits key expiry, so it stays on your tailnet.</p>
   <pre class="term"><code>#cloud-config
 runcmd:
