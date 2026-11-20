@@ -7,6 +7,7 @@ Install: `curl -fsSL https://closedvps.com/install.sh | sh` (macOS, Linux) or `i
 ## Docs
 
 - [The home page as Markdown](https://closedvps.com/index.md): what it does, what you need, the stock retry, what the server gets, recovery when Tailscale breaks
+- [Why ClosedVPS closes every port](https://closedvps.com/why): the October 2026 Linux bug (CVE-2026-98432) and, for each part of the setup, the NIST, CISA, CIS or vendor text that asks for it, quoted, plus where it falls short of CIS
 - [How to lock down a Hetzner VPS by hand](https://closedvps.com/guide): the firewall, Tailscale, SSH and update steps in the Hetzner Console, without ClosedVPS
 - [README](https://github.com/tulayha/closedvps/blob/main/README.md): quick start, everything it creates, security model, getting back in
 - [AGENTS.md](https://github.com/tulayha/closedvps/blob/main/AGENTS.md): running it from a coding agent without prompts

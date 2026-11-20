@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why ClosedVPS closes every port: the October Linux bug and the standards behind each part</title>
+<meta name="description" content="How a Linux kernel bug in October 2026 reached servers with open ports, and how each part of ClosedVPS (no inbound rules, SSH over Tailscale, no root login, security reboots, Docker on localhost, Cloudflare Tunnel) matches NIST, CISA, CIS and vendor docs, with quotes.">
+<link rel="canonical" href="https://closedvps.com/why">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://closedvps.com/why">
+<meta property="og:title" content="Why ClosedVPS closes every port: the October Linux bug and the standards behind each part">
+<meta property="og:description" content="How a Linux kernel bug in October 2026 reached servers with open ports, and how each part of ClosedVPS (no inbound rules, SSH over Tailscale, no root login, security reboots, Docker on localhost, Cloudflare Tunnel) matches NIST, CISA, CIS and vendor docs, with quotes.">
+<meta property="og:image" content="https://closedvps.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A Hetzner server with every port closed: the internet is blocked by a firewall with 0 inbound rules, your laptop gets in over Tailscale">
+<meta property="og:site_name" content="ClosedVPS">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
+<link rel="stylesheet" href="/site.css">
+<script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="/"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>ClosedVPS</a>
+  <nav><a href="/why">Why</a><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a><button class="theme" type="button" aria-label="Switch light or dark"><svg class="i moon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg><svg class="i sun" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></button></nav>
+</header>
+<div class="docgrid">
+<main class="doc">
+  <h1>Why ClosedVPS closes every port</h1>
+  <p>Each thing ClosedVPS sets up on a new server is below, with the standard or vendor document that asks for it,
+    the line itself, and where ClosedVPS does less than the document. It starts with the bug that made this matter
+    in October 2026.</p>
+
+  <h2 id="what-happened-in-october">What happened in October</h2>
+  <p>A bug in how Linux handles TCP turned into a way to take over servers from the internet, and Ubuntu needed
+    two weeks after that to ship a fix.</p>
+  <div class="timeline">
+    <div class="tick"><div class="dot"></div><time>15 Oct</time><div class="t">A kernel fix goes out</div><p>For <a href="https://nvd.nist.gov/vuln/detail/CVE-2026-98432">CVE-2026-98432</a>, a bug in Linux since 4.4, with no word yet on how bad it is.</p></div>
+    <div class="tick bad"><div class="dot"></div><time>27 Oct</time><div class="t">Remote root is shown</div><p>Anthropic <a href="https://www.anthropic.com/research/discovering-vulnerabilities-with-claude">runs commands as root</a> on a server with a Multipath TCP listener, with no login.</p></div>
+    <div class="tick"><div class="dot"></div><time>10 Nov</time><div class="t">Ubuntu ships the fix</div><p>A fixed kernel for 24.04 in <a href="https://ubuntu.com/security/notices/USN-9022-1">USN-9022-1</a>, 14 days after the exploit was public.</p></div>
+    <div class="tick done"><div class="dot"></div><time>by 12 Nov</time><div class="t">ClosedVPS servers run it</div><p>The daily update installs it, and the server reboots into it at 04:00 UTC.</p></div>
+  </div>
+
+  <p>The <a href="https://www.openwall.com/lists/oss-security/2026/10/30/1">advisory on oss-security</a> warned
+    that servers without a Multipath TCP listener might be open to similar attacks. Until the fix,
+    <a href="https://ubuntu.com/security/CVE-2026-98432">Ubuntu's advice</a> was a firewall rule to drop the packets
+    the attack uses. A server behind a Hetzner firewall with no inbound rules never got those packets in the first
+    place.</p>
+
+  <h2 id="a-firewall-with-no-inbound-rules">A firewall with no inbound rules</h2>
+  <p>ClosedVPS creates a Hetzner Cloud firewall with no inbound rules and attaches it when it creates the server, so
+    it's in place before the first boot. Everything coming in is dropped. Outgoing traffic stays open, which NIST
+    describes as the usual practice.</p>
+  <blockquote><p>Generally, firewalls should block all inbound and outbound traffic that has not been expressly
+    permitted by the firewall policy. [...] This practice, known as deny by default, decreases the risk of attack.</p>
+    <cite><a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-41r1.pdf">NIST SP 800-41 Rev. 1</a>, section 4</cite></blockquote>
+  <blockquote><p>If you don't define any rules here, all inbound traffic will be dropped.</p>
+    <cite><a href="https://docs.hetzner.com/cloud/firewalls/faq/">Hetzner Docs, Cloud Firewalls FAQ</a></cite></blockquote>
+  <p>Hetzner's firewall doesn't filter Hetzner's private networks. ClosedVPS doesn't put servers on one.</p>
+
+  <h2 id="ssh-only-over-tailscale">SSH only over Tailscale</h2>
+  <p>Port 22 is never open to the internet. You reach the server over Tailscale, which connects outward from the
+    server. CISA's directive BOD 23-02 makes US federal agencies take management interfaces off the internet and
+    recommends the same to everyone. It names devices like routers and server consoles, and a server's SSH is the
+    same kind of door, though the directive doesn't list it.</p>
+  <blockquote><p>Remove the interface from the internet by making it only accessible from an internal enterprise network.</p>
+    <cite><a href="https://www.cisa.gov/news-events/directives/binding-operational-directive-23-02">CISA BOD 23-02</a>, required actions</cite></blockquote>
+  <blockquote><p>While BOD 23-02 strictly applies to FCEB agencies, this threat extends to every sector. CISA recommends
+    all stakeholders review and adopt this guidance.</p>
+    <cite><a href="https://www.cisa.gov/news-events/alerts/2023/06/13/cisa-issues-bod-23-02-mitigating-risk-internet-exposed-management-interfaces">CISA alert, 13 June 2023</a></cite></blockquote>
+
+  <h2 id="no-root-login-no-passwords">No root login, no passwords</h2>
+  <p>Root can't log in over SSH, and only the user ClosedVPS creates can (<code>AllowUsers</code>). Those are rules
+    5.1.20 and 5.1.4 of the CIS Ubuntu Linux 24.04 Benchmark. CIS has no rule against password login, only against
+    empty passwords (5.1.19). ClosedVPS turns passwords off anyway, so only your SSH key gets in.</p>
+  <blockquote><p>Disallowing root logins over SSH requires system admins to authenticate using their own individual
+    account, then escalating to root.</p>
+    <cite><a href="https://www.tenable.com/audits/CIS_Ubuntu_Linux_24.04_LTS_v2.0.0_L1_Server">CIS Ubuntu Linux 24.04 LTS Benchmark v2.0.0</a>, 5.1.20 Ensure sshd PermitRootLogin is disabled</cite></blockquote>
+
+  <h2 id="security-updates-that-reboot">Security updates that reboot</h2>
+  <p>Ubuntu installs security updates once a day by itself but never reboots, so a fixed kernel waits until
+    someone restarts the server. ClosedVPS turns the reboot on, at 04:00 UTC and only when an update needs it.</p>
+  <blockquote><p>There is no way that an organization can keep up with patching without automation. [...] Automation is
+    also needed for emergency situations, like patching a severe vulnerability that attackers are actively exploiting.</p>
+    <cite><a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-40r4.pdf">NIST SP 800-40 Rev. 4</a>, section 3</cite></blockquote>
+  <blockquote><p>The default value is false.</p>
+    <cite><a href="https://ubuntu.com/server/docs/how-to/software/automatic-updates/">Ubuntu Server docs, Automatic updates</a>, on <code>Automatic-Reboot</code></cite></blockquote>
+
+  <h2 id="docker-ports-stay-on-the-server">Docker ports stay on the server</h2>
+  <p>Docker writes its own firewall rules, and its docs warn that they go around a host firewall like ufw.
+    ClosedVPS sets Docker to publish ports on 127.0.0.1, for single containers and for the networks Compose
+    makes, using the two settings Docker documents for it. The Hetzner firewall already keeps those ports off the
+    internet, and this keeps them off your tailnet too unless you publish one on purpose.</p>
+  <blockquote><p>Docker and ufw use firewall rules in ways that make them incompatible with each other. [...] Packets
+    are routed before the firewall rules can be applied, effectively ignoring your firewall configuration.</p>
+    <cite><a href="https://docs.docker.com/engine/network/packet-filtering-firewalls/">Docker Docs, Packet filtering and firewalls</a></cite></blockquote>
+  <blockquote><p>Publishing container ports is insecure by default.</p>
+    <cite><a href="https://docs.docker.com/engine/network/port-publishing/">Docker Docs, Port publishing and mapping</a></cite></blockquote>
+
+  <h2 id="websites-through-cloudflare-tunnel">Websites through Cloudflare Tunnel</h2>
+  <p>A site you want public goes through Cloudflare Tunnel, which also connects outward, so the firewall stays shut.</p>
+  <blockquote><p>You can then configure your firewall to allow only these outbound connections and block all inbound
+    traffic, effectively blocking access to your origin from anything other than Cloudflare.</p>
+    <cite><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/">Cloudflare docs, Cloudflare Tunnel</a></cite></blockquote>
+
+  <h2 id="where-it-stops-short-of-cis">Where it stops short of CIS</h2>
+  <p>CIS Level 1 also wants ufw switched on with incoming traffic denied (4.1.1 to 4.1.5), and a long list of SSH
+    settings such as allowed ciphers, a login banner and MaxAuthTries. ClosedVPS leaves those at Ubuntu's defaults
+    and relies on the Hetzner firewall in front of the server, so a CIS audit of a fresh server would still flag them.
+    If you need a clean audit, Ubuntu Pro's <a href="https://documentation.ubuntu.com/security/compliance/usg/">Ubuntu Security Guide</a>
+    applies the benchmark on top.</p>
+</main>
+<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#what-happened-in-october">What happened in October</a><a href="#a-firewall-with-no-inbound-rules">A firewall with no inbound rules</a><a href="#ssh-only-over-tailscale">SSH only over Tailscale</a><a href="#no-root-login-no-passwords">No root login, no passwords</a><a href="#security-updates-that-reboot">Security updates that reboot</a><a href="#docker-ports-stay-on-the-server">Docker ports stay on the server</a><a href="#websites-through-cloudflare-tunnel">Websites through Cloudflare Tunnel</a><a href="#where-it-stops-short-of-cis">Where it stops short of CIS</a></nav>
+</div>
+<footer><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
+</div>
+<script>
+document.querySelector(".theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+});
+</script>
+</body>
+</html>

@@ -11,7 +11,12 @@
 <meta property="og:url" content="https://closedvps.com/">
 <meta property="og:title" content="ClosedVPS: a Hetzner server with every port closed">
 <meta property="og:description" content="Free CLI that buys a Hetzner Cloud server behind a firewall that lets nothing in, reachable only over Tailscale. When Hetzner is sold out it keeps trying and tells you when it has one.">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://closedvps.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A Hetzner server with every port closed: the internet is blocked by a firewall with 0 inbound rules, your laptop gets in over Tailscale">
+<meta property="og:site_name" content="ClosedVPS">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&display=swap">
@@ -19,6 +24,9 @@
 <link rel="alternate" type="text/markdown" href="/index.md">
 <script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
 document.documentElement.classList.add("js");</script>
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "WebSite", "name": "ClosedVPS", "url": "https://closedvps.com/" }
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -41,7 +49,7 @@ document.documentElement.classList.add("js");</script>
 <div class="wrap">
 <header class="top">
   <a class="brand" href="/"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>ClosedVPS</a>
-  <nav><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a><button class="theme" type="button" aria-label="Switch light or dark"><svg class="i moon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg><svg class="i sun" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></button></nav>
+  <nav><a href="/why">Why</a><a href="/guide">Guide</a><a href="https://github.com/tulayha/closedvps">GitHub</a><button class="theme" type="button" aria-label="Switch light or dark"><svg class="i moon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg><svg class="i sun" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></button></nav>
 </header>
 <main>
 
@@ -109,8 +117,8 @@ document.documentElement.classList.add("js");</script>
       <div class="proof"><small>the server&#x27;s SSH settings</small><pre><span class="ln"><span class="tk">PermitRootLogin</span> <span class="tk"><span class="ok">no</span></span></span><span class="ln"><span class="tk">PasswordAuthentication</span> <span class="tk"><span class="ok">no</span></span></span></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg><div><div class="t">Security updates daily</div><p>With a reboot at 04:00 UTC when one needs it.</p></div>
       <div class="proof"><small>/etc/apt/apt.conf.d/52closedvps</small><pre><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot</span> <span class="tk"><span class="ok">"true"</span>;</span></span><span class="ln"><span class="tk">Unattended-Upgrade::</span><wbr><span class="tk">Automatic-Reboot-Time</span> <span class="tk"><span class="ok">"04:00"</span>;</span></span></pre></div></div>
-    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z" /><path d="M10 21.9V14L2.1 9.1" /><path d="m10 14 11.9-6.9" /><path d="M14 19.8v-8.1" /><path d="M18 17.5V9.4" /></svg><div><div class="t">Docker stays private</div><p>Published ports bind to 127.0.0.1, so a container can't open one by accident.</p></div>
-      <div class="proof"><small>/etc/docker/daemon.json</small><pre><span class="ln"><span class="tk">{</span> <span class="tk">"ip":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span> <span class="tk">}</span></span></pre></div></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z" /><path d="M10 21.9V14L2.1 9.1" /><path d="m10 14 11.9-6.9" /><path d="M14 19.8v-8.1" /><path d="M18 17.5V9.4" /></svg><div><div class="t">Docker stays private</div><p>Published ports bind to 127.0.0.1, Compose's too, so a container can't open one by accident.</p></div>
+      <div class="proof"><small>/etc/docker/daemon.json, in short</small><pre><span class="ln"><span class="tk">"ip":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span></span><span class="ln"><span class="tk">"…host_binding_ipv4":</span> <span class="tk"><span class="ok">"127.0.0.1"</span></span></span></pre></div></div>
     <h3>Optional</h3>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></svg><div><div class="t">Several at once, under a cap</div><p>Up to ten as stock appears, capped per type and in total.</p></div>
       <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--count</span> <span class="tk">10</span> <span class="tk">--type</span> <span class="tk">cx23:6,cx33:12</span> <span class="tk">--max-total</span> <span class="tk">90</span></span></pre></div></div>
@@ -121,6 +129,11 @@ document.documentElement.classList.add("js");</script>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg><div><div class="t">Claude Code</div><p>Installed for your user, signed in with your own account.</p></div>
       <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--claude</span></span></pre></div></div>
   </div>
+</section>
+
+<section class="block" id="why">
+  <h2>Why every port is closed</h2>
+  <p class="sub">In October a Linux bug let anyone on the internet take over a server listening for Multipath TCP, and Ubuntu had no fix for two weeks after that was shown. A server behind a firewall with no inbound rules never received those packets, and its daily updates rebooted it into the fix once Ubuntu had one. <a href="/why">How each part of ClosedVPS lines up with NIST, CISA, CIS and the vendors' own docs</a>.</p>
 </section>
 
 <section class="block" id="start">

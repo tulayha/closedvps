@@ -245,3 +245,26 @@ footer a:hover { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   .cursor { animation: none; }
 }
+
+/* on the why page: the October bug as a vertical log; red marks the days a public exploit had no fix */
+.doc .timeline { margin-top: 28px; grid-template-columns: 1fr; gap: 22px; padding-left: 38px; }
+.doc .timeline::before { left: 11px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; background: repeating-linear-gradient(180deg, var(--line2) 0 8px, transparent 8px 14px); }
+.doc .tick .dot { position: absolute; left: -38px; top: 0; }
+.doc .tick time { margin-top: 0; }
+.doc .tick p { margin-top: 4px; font-size: 15px; }
+.tick.bad .dot { background: var(--red); border-color: var(--red); }
+.tick p a { color: var(--ink); text-underline-offset: 3px; }
+.doc blockquote { margin: 18px 0 0; padding: 14px 18px; border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; background: var(--paper); }
+.doc blockquote p { margin: 0; color: var(--ink); font-size: 15.5px; }
+.doc blockquote cite { display: block; margin-top: 8px; font: 12px/1.5 var(--mono); font-style: normal; color: var(--soft); }
+.doc blockquote cite a { color: inherit; text-underline-offset: 3px; }
+/* plain pages on wide screens: the reading column, and a list of its sections that stays in view */
+.toc { display: none; }
+@media (min-width: 1000px) {
+  .docgrid { display: grid; grid-template-columns: minmax(0, 44rem) 1fr; column-gap: 72px; }
+  .toc { display: flex; flex-direction: column; gap: 9px; position: sticky; top: 0; align-self: start; padding-top: 72px; font-size: 13.5px; }
+  .toc .h { margin-bottom: 4px; font: 500 12px/1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--soft); }
+  .toc a { color: var(--muted); text-decoration: none; }
+  .toc a:hover { color: var(--ink); }
+}
+.doc h2[id] { scroll-margin-top: 24px; }
