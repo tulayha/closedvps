@@ -30,6 +30,7 @@ func TestRenderMinimal(t *testing.T) {
 		"#cloud-config\n", `hostname: "vps"`, `- name: "dev"`, `"` + key + `"`, "AllowUsers dev",
 		"PasswordAuthentication no", "Automatic-Reboot \"true\"", `"com.docker.network.bridge.host_binding_ipv4": "127.0.0.1"`,
 		"tailscale up --auth-key=\"$key\" --hostname=vps --advertise-tags=tag:closedvps",
+		"tailscale up --reset --auth-key=\"$key\" --hostname=vps ;;", // tailscale up keeps the refused tag otherwise
 		`content: "tskey-auth-abc123-XYZ"`,
 		"- nftables", "ip daddr 169.254.169.254 meta skuid != 0 drop", "enable --now closedvps-metadata.service",
 	} {

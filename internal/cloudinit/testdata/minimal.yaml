@@ -82,8 +82,10 @@ write_files:
     permissions: "0600"
     content: "tskey-auth-abc123-XYZ"
   # The server asks for tag:closedvps itself, so a key made without the tag still gives a tagged server. Only
-  # when the tailnet's policy refuses the tag does it join untagged, and closedvps then says how to fix that.
-  # Any other failure (no network yet) fails the unit, which retries, so a one-off key is never spent untagged.
+  # when the tailnet's policy refuses the tag ("requested tags [...] are invalid or not permitted", which leaves
+  # a one-off key unspent) does it join untagged, and closedvps then says how to fix that. tailscale up keeps the
+  # refused --advertise-tags, so the second try needs --reset. Any other failure (no network yet) fails the
+  # unit, which retries.
   - path: /usr/local/lib/closedvps/join.sh
     permissions: "0755"
     content: |
@@ -92,7 +94,7 @@ write_files:
       out=$(tailscale up --auth-key="$key" --hostname=vps --advertise-tags=tag:closedvps 2>&1) && exit 0
       echo "$out" >&2
       case "$out" in
-        *tag*) exec tailscale up --auth-key="$key" --hostname=vps ;;
+        *"requested tags"*) exec tailscale up --reset --auth-key="$key" --hostname=vps ;;
       esac
       exit 1
   - path: /etc/systemd/system/closedvps-join.service
