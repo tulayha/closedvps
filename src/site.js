@@ -45,7 +45,7 @@ export const pages = [
     name: "Tailscale for a VPS",
     description:
       "A new tailnet lets every device reach every other one. Tag your VPS and change one rule so your devices reach it and it can't open connections back.",
-    llms: "the tailnet policy change (tagOwners and src autogroup:member), a tagged auth key, tagging a running server, and what changes",
+    llms: "the tailnet policy change (tagOwners and src autogroup:member), the auth key, an optional OAuth client for closedvps setup, tagging a running server, and what changes",
     published: "2026-11-20",
     modified: "2026-11-20",
   },

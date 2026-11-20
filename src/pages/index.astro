@@ -42,9 +42,9 @@ document.querySelectorAll("[data-os]").forEach((b) => b.addEventListener("click"
   const pane = document.getElementById("pane");
   const full = document.getElementById("story");
   // steps: waiting, bought, set up, checked from outside
-  const cut = [story.findIndex(([k]) => k === "wait"), story.findIndex(([, x]) => x.startsWith("First-boot")), story.findIndex(([k], i) => i > 0 && k === "cmd")];
+  const cut = [story.findIndex(([k]) => k === "wait"), story.findIndex(([k]) => k === "dots"), story.findIndex(([k], i) => i > 0 && k === "cmd")];
   const steps = [story.slice(0, cut[0]), story.slice(cut[0], cut[1]), story.slice(cut[1], cut[2]), story.slice(cut[2])];
-  const html = ([k, x]) => k === "cmd" ? `<span class="dim">$</span> <span class="b">${x}</span>` : k === "dots" ? `${x}............ <span class="ok">online</span>` : k === "prompt" ? `${x}<span class="cursor"></span>` : x;
+  const html = ([k, x]) => k === "cmd" ? `<span class="dim">$</span> <span class="b">${x}</span>` : k === "dots" ? `${x}............` : k === "prompt" ? `${x}<span class="cursor"></span>` : x;
   const draw = (pre, st) => { pre.innerHTML = st.map((s) => `<span class="ln">${html(s)}</span>`).join(""); };
   full.classList.add("sr");
   // every step drawn once, stacked and hidden, so the box keeps the tallest one's height
@@ -67,7 +67,6 @@ document.querySelectorAll("[data-os]").forEach((b) => b.addEventListener("click"
         } else if (k === "dots") {
           const s = add(x);
           for (let i = 0; i < 12; i++) { s.append("."); await sleep(90, id); }
-          s.insertAdjacentHTML("beforeend", ' <span class="ok">online</span>');
           await sleep(350, id);
           continue;
         } else add(html([k, x]));

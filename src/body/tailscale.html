@@ -3,9 +3,9 @@
   <h1>Tag your VPS so it can't reach your laptop over Tailscale</h1>
   <p>A new tailnet lets every device reach every other one. Put a VPS on it and the VPS can open connections to
     your laptop, your phone and your NAS, while a server running Claude Code installs packages and runs code you
-    haven't read. Two changes to the tailnet policy and a tagged auth key let your devices reach the server and stop
-    the server from starting connections to them. <a href="/">ClosedVPS</a> asks for that key and warns when a new
-    server joins without the tag.</p>
+    haven't read. Two changes to the tailnet policy let your devices reach the server and stop the server from
+    starting connections to them. Each <a href="/">ClosedVPS</a> server asks for the tag when it joins, and
+    ClosedVPS warns when one joins without it.</p>
 
   <h2 id="why-a-vps-can-reach-your-laptop">Why a VPS can reach your laptop</h2>
   <p>Tailscale starts every tailnet with a policy that allows everything:</p>
@@ -29,16 +29,29 @@
     already tag other devices, such as a home server, they lose the right to start connections too, so give them
     their own rule.</p>
 
-  <h2 id="make-a-tagged-auth-key">Make a tagged auth key</h2>
-  <p>In <a href="https://login.tailscale.com/admin/settings/keys">Settings, Keys</a>, choose Generate auth key, turn
-    on Tags, and pick <code>tag:closedvps</code>. If your tailnet asks you to approve new devices, turn on
-    Pre-approved as well. Leave Reusable off for one server. For several
-    at once with <code>--count</code>, turn it on and let the key expire within a day. A device that joins with
-    the key gets its tag:</p>
-  <blockquote><p>After a device logs in as the user who generated the auth key, the device assumes the identity of the auth key's tags.</p>
-    <cite><a href="https://tailscale.com/kb/1085/auth-keys">Tailscale docs, auth keys</a></cite></blockquote>
-  <p>Paste it when <code>closedvps create</code> asks, or set it as <code>TS_AUTHKEY</code>. Setting a server up
-    by hand, use it in the <a href="/guide">guide's</a> <code>tailscale up</code> line.</p>
+  <h2 id="the-auth-key">The auth key</h2>
+  <p>In <a href="https://login.tailscale.com/admin/settings/keys">Settings, Keys</a>, choose Generate auth key. If
+    your tailnet asks you to approve new devices, turn on Pre-approved. Leave Reusable off for one server. For
+    several at once with <code>--count</code>, turn it on and let the key expire within a day. Paste it when
+    <code>closedvps create</code> asks, or set it as <code>TS_AUTHKEY</code>. The key needs no tag of its own,
+    since the server asks for <code>tag:closedvps</code> itself, which the policy above allows. Setting a server
+    up by hand, turn on Tags and pick <code>tag:closedvps</code>, and use the key in the <a href="/guide">guide's</a>
+    <code>tailscale up</code> line.</p>
+
+  <h2 id="or-save-an-oauth-client">Or save an OAuth client</h2>
+  <p>If you buy servers often, or wait for stock for days, <code>closedvps setup</code> can save a Tailscale OAuth
+    client in its last step. ClosedVPS then makes a one-off tagged key for each server at the moment it buys,
+    and checks before buying that your policy has the tag and keeps it away from your devices. In the admin
+    console open <a href="https://console.tailscale.com/admin/settings/trust-credentials">Settings, Trust
+    credentials</a>, choose Credential, then OAuth, and give it these scopes:</p>
+  <ul>
+    <li>Auth Keys, write, with the tag <code>tag:closedvps</code></li>
+    <li>Policy File, read</li>
+    <li>Devices, read</li>
+  </ul>
+  <p>If it leaked, it could add devices tagged <code>tag:closedvps</code> and read your policy and device list. It
+    can't reach your devices or change the policy. On a machine without a password store, such as a container,
+    pass it as <code>TS_OAUTH_CLIENT_ID</code> and <code>TS_OAUTH_CLIENT_SECRET</code>.</p>
 
   <h2 id="tag-a-server-that-s-already-running">Tag a server that's already running</h2>
   <p>On the <a href="https://login.tailscale.com/admin/machines">Machines</a> page, open the menu at the end of the
@@ -59,5 +72,5 @@
     tagged servers can't reach each other either, until you add a rule from <code>tag:closedvps</code> to
     <code>tag:closedvps</code>.</p>
 </main>
-<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#why-a-vps-can-reach-your-laptop">Why a VPS can reach your laptop</a><a href="#change-the-policy">Change the policy</a><a href="#make-a-tagged-auth-key">Make a tagged auth key</a><a href="#tag-a-server-that-s-already-running">Tag a server that's already running</a><a href="#what-changes">What changes</a></nav>
+<nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#why-a-vps-can-reach-your-laptop">Why a VPS can reach your laptop</a><a href="#change-the-policy">Change the policy</a><a href="#the-auth-key">The auth key</a><a href="#or-save-an-oauth-client">Or save an OAuth client</a><a href="#tag-a-server-that-s-already-running">Tag a server that's already running</a><a href="#what-changes">What changes</a></nav>
 </div>
