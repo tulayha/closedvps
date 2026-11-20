@@ -60,7 +60,7 @@ scripts and `closedvps upgrade` keep the previous release until then.
 | `internal/tsapi` | Tailscale through its official Go client: one-off keys, the policy check, devices |
 | `internal/cloudinit` | the first-boot setup and the checks on what goes in it; `testdata/*.yaml` is the whole setup |
 | `internal/alert` | alert links and the requests that deliver to them |
-| `skills/closedvps` | the agent skill, also a Claude Code plugin (`claude plugin validate .`) |
+| `skills/`, `hooks/` | the Claude Code plugin (`claude plugin validate .`): the `closedvps` skill other agents can load too, `/closedvps:create` and `/closedvps:delete`, and a hook that sends real buys and deletes to the user for approval |
 | `install/` | install.sh and install.ps1, attached to each release and served at closedvps.com |
 
 The website, closedvps.com, is on the `site` branch, which has its own README.

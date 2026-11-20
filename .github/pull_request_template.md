@@ -7,4 +7,4 @@ release notes word for word, so write them for people using closedvps. Types and
 
 - [ ] `go test -race ./...` and `golangci-lint run`
 - [ ] if the first-boot setup changed: `go test ./internal/cloudinit -update` and the diff in `testdata/` reviewed
-- [ ] if flags, exit codes or events changed: the skill (`skills/closedvps/SKILL.md`) updated
+- [ ] if flags, exit codes or events changed: the skill (`skills/closedvps/`) updated

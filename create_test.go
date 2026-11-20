@@ -287,21 +287,24 @@ func TestHelpGoesToStdout(t *testing.T) {
 	}
 }
 
-// The skill is what agents read, so it must say what the code does: the exit codes word for word and every
-// event.
+// The skill (SKILL.md and its references) is what agents read, so it must say what the code does: the exit
+// codes word for word and every event.
 func TestSkillMatchesHelp(t *testing.T) {
-	b, err := os.ReadFile("skills/closedvps/SKILL.md")
-	if err != nil {
-		t.Fatal(err)
+	var skill strings.Builder
+	for _, f := range []string{"SKILL.md", "references/events.md", "references/after-create.md"} {
+		b, err := os.ReadFile("skills/closedvps/" + f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		skill.Write(b)
 	}
-	skill := string(b)
 	_, codes, _ := strings.Cut(createLong, "Exit codes:")
-	if !strings.Contains(skill, "Exit codes:"+codes) {
-		t.Error("the exit codes in SKILL.md differ from `closedvps create --help`")
+	if !strings.Contains(skill.String(), "Exit codes:"+codes) {
+		t.Error("the exit codes in the skill differ from `closedvps create --help`")
 	}
 	for _, k := range eventKinds {
-		if !strings.Contains(skill, "`"+k+"`") {
-			t.Errorf("SKILL.md doesn't mention the %s event", k)
+		if !strings.Contains(skill.String(), "`"+k+"`") {
+			t.Errorf("the skill doesn't mention the %s event", k)
 		}
 	}
 }
