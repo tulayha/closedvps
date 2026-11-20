@@ -8,10 +8,10 @@ export const org = { "@type": "Organization", name: "ClosedVPS", url: `${site}/`
 export const pages = [
   {
     path: "/",
-    title: "ClosedVPS: a Hetzner VPS even when it's sold out, no open ports",
+    title: "ClosedVPS: a Hetzner VPS off the internet, even when it's sold out",
     name: "ClosedVPS",
     description:
-      "Hetzner CX23 not available? This free CLI checks every minute, buys within your price cap and sets the VPS up with no open ports and SSH over Tailscale.",
+      "A free CLI that buys a Hetzner VPS with every port closed and SSH over Tailscale. When the CX23 is sold out, it checks every minute and buys within your price cap.",
     llms: "what it does, what you need, the stock retry, what the server gets, recovery when Tailscale breaks",
     published: "2026-11-19",
     modified: "2026-11-20",
