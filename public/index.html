@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClosedVPS: a Hetzner server with every port closed</title>
-<meta name="description" content="Free CLI that buys a Hetzner Cloud server behind a firewall that lets nothing in, reachable only over Tailscale. When Hetzner is sold out it keeps trying and tells you when it has one.">
+<title>ClosedVPS: a Hetzner VPS even when it's sold out, no open ports</title>
+<meta name="description" content="Hetzner CX23 not available? This free CLI checks every minute, buys within your price cap and sets the VPS up with no open ports and SSH over Tailscale.">
 <link rel="canonical" href="https://closedvps.com/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://closedvps.com/">
-<meta property="og:title" content="ClosedVPS: a Hetzner server with every port closed">
-<meta property="og:description" content="Free CLI that buys a Hetzner Cloud server behind a firewall that lets nothing in, reachable only over Tailscale. When Hetzner is sold out it keeps trying and tells you when it has one.">
+<meta property="og:title" content="ClosedVPS: a Hetzner VPS even when it's sold out, no open ports">
+<meta property="og:description" content="Hetzner CX23 not available? This free CLI checks every minute, buys within your price cap and sets the VPS up with no open ports and SSH over Tailscale.">
 <meta property="og:image" content="https://closedvps.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -96,7 +96,7 @@ document.documentElement.classList.add("js");</script>
 
 <section class="block" id="sold-out">
   <h2>When Hetzner is sold out</h2>
-  <p class="sub">Since June 2026 Hetzner is often out of its cheaper servers, and refuses some accounts at random (<a href="https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/">what changed</a>).</p>
+  <p class="sub">Since June 2026 Hetzner is often out of its cheaper servers, and refuses some accounts at random (<a href="https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/">what changed</a>, and <a href="/sold-out">what to do about it</a>).</p>
   <div class="timeline">
     <div class="tick done"><div class="dot"></div><time>09:14</time><div class="t">Check 1</div><p>Nothing on your list is in stock.</p></div>
     <div class="tick"><div class="dot"></div><time>every minute</time><div class="t">Checks again</div><p>Your computer stays awake while it waits.</p></div>
@@ -126,7 +126,7 @@ document.documentElement.classList.add("js");</script>
       <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--backups</span></span></pre></div></div>
     <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg><div><div class="t">Cloudflare Tunnel</div><p>For sites you want public. It connects outward, so the firewall stays closed.</p></div>
       <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">CLOUDFLARE_TUNNEL_TOKEN=…</span> <span class="tk">closedvps</span> <span class="tk">create</span></span></pre></div></div>
-    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg><div><div class="t">Claude Code</div><p>Installed for your user, signed in with your own account.</p></div>
+    <div class="card"><svg class="i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg><div><div class="t">Claude Code</div><p>Installed for your own user with what its sandbox needs, signed in with your own account (<a href="/claude-code">setup and phone access</a>).</p></div>
       <div class="proof"><small>the command</small><pre><span class="ln"><span class="tk"><span class="dim">$</span></span> <span class="tk">closedvps</span> <span class="tk">create</span> <span class="tk">--claude</span></span></pre></div></div>
   </div>
 </section>
@@ -159,7 +159,7 @@ document.documentElement.classList.add("js");</script>
 <a class="cta" href="/guide"><div class="s">Rather do it yourself?</div><div class="t">How to lock down a Hetzner VPS by hand</div><span class="go">Read the guide →</span></a>
 </main>
 
-<footer><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
+<footer><a href="/claude-code">Claude Code on a VPS</a><a href="/sold-out">When Hetzner is sold out</a><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
 </div>
 <script>
 document.querySelector(".theme").addEventListener("click", () => {

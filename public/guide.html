@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How to lock down a Hetzner VPS by hand: firewall, Tailscale, SSH, updates</title>
-<meta name="description" content="Step-by-step: a Hetzner Cloud firewall with no inbound rules, SSH only over Tailscale, no SSH passwords, automatic security updates and Cloudflare Tunnel for websites, in the order that avoids locking yourself out.">
+<title>Harden a Hetzner VPS with Tailscale: no open ports, step by step</title>
+<meta name="description" content="Hetzner VPS hardening by hand: a cloud firewall with no inbound rules, SSH only over Tailscale, no passwords, automatic security updates and Cloudflare Tunnel, in the order that won't lock you out.">
 <link rel="canonical" href="https://closedvps.com/guide">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://closedvps.com/guide">
-<meta property="og:title" content="How to lock down a Hetzner VPS by hand: firewall, Tailscale, SSH, updates">
-<meta property="og:description" content="Step-by-step: a Hetzner Cloud firewall with no inbound rules, SSH only over Tailscale, no SSH passwords, automatic security updates and Cloudflare Tunnel for websites, in the order that avoids locking yourself out.">
+<meta property="og:title" content="Harden a Hetzner VPS with Tailscale: no open ports, step by step">
+<meta property="og:description" content="Hetzner VPS hardening by hand: a cloud firewall with no inbound rules, SSH only over Tailscale, no passwords, automatic security updates and Cloudflare Tunnel, in the order that won't lock you out.">
 <meta property="og:image" content="https://closedvps.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,6 +23,19 @@
 <link rel="stylesheet" href="/site.css">
 <script>try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
 document.documentElement.classList.add("js");</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Harden a Hetzner VPS with Tailscale: no open ports, step by step",
+  "description": "Hetzner VPS hardening by hand: a cloud firewall with no inbound rules, SSH only over Tailscale, no passwords, automatic security updates and Cloudflare Tunnel, in the order that won't lock you out.",
+  "url": "https://closedvps.com/guide",
+  "image": "https://closedvps.com/og.png",
+  "datePublished": "2026-11-18",
+  "dateModified": "2026-11-19",
+  "publisher": { "@type": "Organization", "name": "ClosedVPS", "url": "https://closedvps.com/" }
+}
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -75,7 +88,7 @@ END</pre>
 </main>
 <nav class="toc" aria-label="On this page"><div class="h">On this page</div><a href="#1-make-the-firewall-first">1. Make the firewall first</a><a href="#2-create-the-server-with-tailscale-in-its-first-boot">2. Create the server with Tailscale in its first boot</a><a href="#3-turn-off-ssh-passwords">3. Turn off SSH passwords</a><a href="#4-let-security-updates-reboot-it">4. Let security updates reboot it</a><a href="#5-serve-websites-through-cloudflare-tunnel">5. Serve websites through Cloudflare Tunnel</a></nav>
 </div>
-<footer><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
+<footer><a href="/claude-code">Claude Code on a VPS</a><a href="/sold-out">When Hetzner is sold out</a><a href="https://github.com/tulayha/closedvps/blob/main/LICENSE">MIT licensed</a><a href="https://github.com/tulayha/closedvps">Source</a><a href="https://github.com/tulayha/closedvps#security-model">Security model</a><a href="/llms.txt">llms.txt</a></footer>
 </div>
 <script>
 document.querySelector(".theme").addEventListener("click", () => {

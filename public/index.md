@@ -37,7 +37,8 @@ out.
 
 Since June 2026 Hetzner often shows its cheaper types as unavailable, and it refuses new servers on new
 accounts and on some older ones chosen at random
-([a write-up of what changed](https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/)).
+([a write-up of what changed](https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/),
+and [what to do about it](https://closedvps.com/sold-out)).
 ClosedVPS takes any refusal that waiting can fix as another round. One it can't fix, such as a bad token or a
 full account limit, stops it with Hetzner's own message. While it waits it keeps your computer from sleeping on
 idle, but closing a laptop lid still stops it.
@@ -84,7 +85,7 @@ can't log in. Security updates install daily, with a reboot at 04:00 UTC when on
 Pass `CLOUDFLARE_TUNNEL_TOKEN` and the server runs your Cloudflare Tunnel, for sites you want public. If you
 install Docker later, ports you publish bind to 127.0.0.1, in Compose too; to reach one from your laptop, publish it on the
 server's Tailscale IP (`-p 100.x.y.z:3000:3000`). `--claude` adds Claude Code, which you log in to with your own
-account.
+account ([setup and phone access](https://closedvps.com/claude-code)).
 
 ## Why every port is closed
 
